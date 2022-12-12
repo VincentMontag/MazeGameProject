@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Maze Game</title>
+
+<script src="Maze.js"></script>
+
+    <style>
+    	/*TODO*/
+    	div{
+    		margin: 1%;
+    		
+    	}
+    	
+    	canvas{
+    		border: 2px solid black;
+    		margin: 0;
+    		display:block;	
+    		float: left;
+ 
+    	}
+    	
+    	body {
+    		background:lightyellow;
+		}
+		
+    </style>
+    	
+</head>
+<body onload="draw();">
+
+	<h1>Welcome to our Web-Project: The Maze Game</h1>
+	
+	<div>
+    	<canvas id = "MazeGame" width = "1520" height = "760"></canvas>
+	</div>
+	
+	<div>
+    	<p><input type="submit" value="Einfach" onClick="draw()"></p>
+       	<p><input type="submit" value="Mittel" onClick="draw()"></p>
+        <p><input type="submit" value="Schwer" onClick="draw()"></p>
+    	<canvas id = "Options" width = "250" height = "760"></canvas>
+	</div>
+	
+</body>
+</html>
