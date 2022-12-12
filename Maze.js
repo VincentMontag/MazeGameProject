@@ -1,8 +1,8 @@
 // Box width 1520
-const bw = 1520;
+const bw = 1320;
 
 // Box height 760
-const bh = 760;
+const bh = 660;
 
 // Padding
 const p = 0;
@@ -13,14 +13,16 @@ const easyMode = 76;
 
 let mode = hardMode;
 
-let width = bw / mode;
-let height = bh / mode;
+let width = bw / mode - 1;
+let height = bh / mode - 1;
 
 // Maze
 let maze = [];
 
 function generateMaze() {
 	let solvable = false;
+	for (i = 0; i < bh / mode; i++)
+		maze[i] = [];
 	do {
 		fillRandomly();	
 		buildFrame();
@@ -38,9 +40,8 @@ function generateMaze() {
 }
 
 function fillRandomly() {
-	for (i = 0; i < bh / mode; i++) {
-		maze[i] = [];
-		for (k = 0; k < bw / mode; k++) {
+	for (i = 1; i < height; i++) {
+		for (k = 1; k < width; k++) {
 			maze[i][k] = 1 << Math.floor(Math.random() * 4);
 		}
 	}
@@ -75,7 +76,7 @@ function draw(){
 	const mazegame = document.getElementById("MazeGame");
 	const options = document.getElementById("Options");
 	
-	if(mazegame.getContext){
+	if (mazegame.getContext){
 	    	
 	    const mazegame2d = mazegame.getContext("2d");
 	    const options2d = mazegame.getContext("2d");
@@ -98,13 +99,10 @@ function draw(){
 	    // Path2d(d); path from SVG path data
 	    //-------------------------------------------------
 	    // Grid:
-	    mazegame2d.fillStyle = "rgb(255,0,0)";
-	    mazegame2d.fillRect(0,0, 10,10);
 		mazegame2d.fillStyle = "rgb(0, 0, 0)";
 	
 		for (y = 0; y < bh / mode; y++) {
 			for (x = 0; x < bw / mode; x++) {
-				console.log("Jaja"+maze[y][x]);
 				if ((maze[y][x] & 0b1) == 1) // right vertical line
 					mazegame2d.fillRect(
 						mode * (x + 3.0 / 4), 
@@ -130,23 +128,10 @@ function draw(){
 						mode * 1.5,
 						mode * 0.5);
 			}
-	}
-	/*	
-		
-		
-		for (let x = 0; x <= bw; x += mode) {
-			mazegame2d.moveTo(x + p, p);
-		    mazegame2d.lineTo(x + p, bh + p);
 		}
-		
-		for (let x = 0; x <= bh; x += mode) {
-		    mazegame2d.moveTo(p, x + p);
-		    mazegame2d.lineTo(bw + p, x + p);
-		}*/
-		
 		mazegame2d.stroke();
 		
-	} else{
+	} else {
 	    	// canvas unsupported code here
 	    	console.log("UNSUPPORTED BROWSER DETECTED, PLEASE CHANGE BROWSER TO CONTINUE");
 	}	    
