@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        * {box-sizing: border-box}
+        body {
+          font-family: Verdana, sans-serif; 
+          margin:0;
+          border-radius: 5px;
+          margin: 30px;
+        }
+        .mySlides {display: none}
+        img {vertical-align: middle;}
+
+        .AutoAuswahl {
+        max-width: 1000px;
+        position: middle;
+        margin: auto;
+        }
+
+       button {
+        position: middle;
+        max-width: 1000px;
+        margin: 10px;
+        font-weight: bold;
+        padding: 10px;
+       }
+
+       .pfeil {
+        position: absolute;
+        font-size: 30px;
+        font-weight: bold;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 15%;
+        user-select: none;
+        cursor: pointer;
+        top: 30%;
+        padding: 16px;
+        margin-top: -50px;
+        transition: 0.6s ease;
+        border-radius: 0 3px 3px 0;
+       }
+
+       .pfeil:hover{
+          color: black;
+       }
+
+       .pfeil-prev{
+          left: 0;
+       }
+
+       .pfeil-next{
+          right: 20;
+       }
+
+        .numbertext {
+        color: black;
+        font-size: 12px;
+        padding: 8px 12px;
+        position: absolute;
+        top: 33%;
+        }
+    </style>
+        <title>Labyrinth</title>
+    </head>
+    <body>
+      <h1>Das Maze-Race</h1>
+        <label>Bitte einen Nutzernamen eingeben: <input type="text" /></label>
+        <p></p>
+        Bitte ein Auto auswählen:
+        <p></p>
+        <div class="AutoAuswahl">
+
+          <a class="pfeil pfeil-prev" onclick="plusSlides(-1)"><span>&#10094;</span></a>
+          <a class="pfeil pfeil-next" onclick="plusSlides(1)"><span>&#10095;</span></a>
+            <div class="car">
+              <div class="numbertext">1 / 10</div>
+              <img src="player_blue.png">
+            </div>
+            
+            <div class="car">
+              <div class="numbertext">2 / 10</div>
+              <img src="player_brown.png">
+            </div>
+            
+            <div class="car">
+              <div class="numbertext">3 / 10</div>
+              <img src="player_green.png">
+            </div>
+
+            <div class="car">
+                <div class="numbertext">4 / 10</div>
+                <img src="player_grey.png">
+            </div>
+
+            <div class="car">
+                <div class="numbertext">5 / 10</div>
+                <img src="player_orange.png">
+            </div>
+
+            <div class="car">
+                <div class="numbertext">6 / 10</div>
+                <img src="player_pink.png">
+            </div>
+
+            <div class="car">
+                <div class="numbertext">7 / 10</div>
+                <img src="player_purple.png">
+            </div>
+
+            <div class="car">
+                <div class="numbertext">8 / 10</div>
+                <img src="player_red.png">
+            </div>
+
+            <div class="car">
+                <div class="numbertext">9 / 10</div>
+                <img src="player_white.png">
+            </div>
+
+            <div class="car">
+                <div class="numbertext">10 / 10</div>
+                <img src="player_yellow.png">
+            </div>
+            
+            </div>
+            <br>
+            <br>
+
+            <button class="button highscore">Highscore</button>
+            <button class= "button start">Start</button>
+            <button class="button regeln">Regeln</button>
+            
+            <script>
+            let slideIndex = 1;
+            showSlides(slideIndex);
+            
+            function plusSlides(n) {
+              showSlides(slideIndex += n);
+            }
+            
+            function showSlides(n) {
+              let i;
+              let slides = document.getElementsByClassName("car");
+      
+              if (n > slides.length) {slideIndex = 1}    
+              if (n < 1) {slideIndex = slides.length}
+              for (i = 0; i < slides.length; i++) {
+                slides[i].style.display = "none";  
+              }
+            
+              slides[slideIndex-1].style.display = "block";  
+            }
+            </script>
+    </body>
+</html>
