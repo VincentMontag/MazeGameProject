@@ -130,7 +130,7 @@
 
             <button class="button highscore" href="" type="Button">Highscore</button>
             <a href="Canvas.html"><button class="button start" type="Button">Start</button></a>
-            <button class="button regeln" href="" type="Button">Regeln</button>
+            <a href="javascript:oeffneFenster('Regeln.html')"><button class="button regeln">Regeln</button></a>
             
             <script>
             let slideIndex = 1;
@@ -151,6 +151,12 @@
               }
             
               slides[slideIndex-1].style.display = "block";  
+            }
+
+            function oeffneFenster(txt){
+              var kleinesfenster = window.open(txt,"_blank",
+              "width=500,height=400,"+
+              "resizable=yes,status=no,menubar=yes,location=no,scrollbars=yes,toolbar=no");
             }
             </script>
     </body>
