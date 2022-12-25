@@ -11,7 +11,7 @@ const path = require("path");
 
 //server.use(cookieparser());
 // The folder with all html files
-server.use(express.static("."));
+server.use(express.static("public"));
 server.set("view engine", "ejs");
 
 // render the ejs views
