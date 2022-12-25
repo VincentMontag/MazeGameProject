@@ -67,8 +67,7 @@
     <body>
       <h1>Das Maze-Race</h1>
         <label>Bitte einen Nutzernamen eingeben: 
-        	<input type="text" id="username" placeholder="Enter Username..."/> 
-        	<button class="submit" type="Button" onClick="console.log(document.getElementById('username').value)">Submit</button>
+        	<input type="text" id="username" placeholder="Nutzername..."/> 
         </label>
         <p></p>
         Bitte ein Auto auswählen:
@@ -132,10 +131,13 @@
             <br>
 
             <button class="button highscore" href="" type="Button">Highscore</button>
-            <a href="Canvas.html"><button class="button start" type="Button">Start</button></a>
-            <a href="javascript:oeffneFenster('Regeln.html')"><button class="button regeln">Regeln</button></a>
+            <button class="submit" type="Button" onClick="start()">Start</button>
+            <a href="javascript:openRules('Regeln.html')"><button class="button regeln">Regeln</button></a>
             
             <script>
+            
+            let socket = null;
+        	let port = null;
             
             let slideIndex = 1;
             showSlides(slideIndex);
@@ -157,11 +159,38 @@
               slides[slideIndex-1].style.display = "block";  
             }
 
-            function oeffneFenster(txt){
-              var kleinesfenster = window.open(txt,"_blank",
+            function openRules(txt){
+              window.open(txt,"_blank",
               "width=500,height=400,"+
               "resizable=yes,status=no,menubar=yes,location=no,scrollbars=yes,toolbar=no");
             }
+            
+            function start() {
+            	// Initialize player
+            	let player = {
+            		name: document.getElementById('username').value,
+            		car: slideIndex
+            	}
+            	
+            	// Create connection to server
+            	port = parseInt(location.port)+1;
+        		socket = new WebSocket(`ws://${location.hostname}:${port}`);		
+        		socket.onopen = () => {
+        			console.log("Connection opened!");
+        			// TODO ...
+        			location.href = "Canvas.html";
+        		};
+        		socket.onmessage = ({data}) => {
+        			//TODO: refresh the maze
+        		}
+        		socket.onclose = () => {
+        			// Some stuff executed on close
+        		}
+        		
+        		// Provide the server with the chosen player data
+        		socket.send(player);
+            }
+            
             </script>
     </body>
 </html>

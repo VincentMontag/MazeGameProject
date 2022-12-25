@@ -16,6 +16,14 @@ class Direction{
  		this.num = num;
 	}
 	
+	equal(direction) {
+		if (this.num == 0 && direction == "RIGHT") return true;
+		if (this.num == 1 && direction == "UP") return true;
+		if (this.num == 2 && direction == "LEFT") return true;
+		if (this.num == 3 && direction == "DOWN") return true;
+		return false;
+	}
+	
  	left(){
  		if(this.num == 0){
  			return Direction.UP;
