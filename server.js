@@ -11,7 +11,7 @@ const path = require("path");
 
 //server.use(cookieparser());
 // The folder with all html files
-server.use(express.static("public"));
+server.use(express.static("."));
 server.set("view engine", "ejs");
 
 // render the ejs views
@@ -35,7 +35,7 @@ players = {}
 
 // Start
 server.get("/", (req, res) => {
-	data = fs.readFileSync("Start.html", { encoding: 'utf8', flag: 'r' });
+    data = fs.readFileSync("public/Start.html", { encoding: 'utf8', flag: 'r' });
     res.send(data);
 });
 
