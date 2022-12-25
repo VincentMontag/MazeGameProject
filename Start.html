@@ -66,7 +66,10 @@
     </head>
     <body>
       <h1>Das Maze-Race</h1>
-        <label>Bitte einen Nutzernamen eingeben: <input type="text" /></label>
+        <label>Bitte einen Nutzernamen eingeben: 
+        	<input type="text" id="username" placeholder="Enter Username..."/> 
+        	<button class="submit" type="Button" onClick="console.log(document.getElementById('username').value)">Submit</button>
+        </label>
         <p></p>
         Bitte ein Auto auswählen:
         <p></p>
@@ -133,6 +136,7 @@
             <a href="javascript:oeffneFenster('Regeln.html')"><button class="button regeln">Regeln</button></a>
             
             <script>
+            
             let slideIndex = 1;
             showSlides(slideIndex);
             
