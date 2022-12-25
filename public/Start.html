@@ -132,7 +132,7 @@
 
             <button class="button highscore" href="" type="Button">Highscore</button>
             <button class="submit" type="Button" onClick="start()">Start</button>
-            <a href="javascript:openRules('Regeln.html')"><button class="button regeln">Regeln</button></a>
+            <a href="javascript:openRules('private/Regeln.html')"><button class="button regeln">Regeln</button></a>
             
             <script>
             
@@ -178,7 +178,7 @@
         		socket.onopen = () => {
         			console.log("Connection opened!");
         			// TODO ...
-        			location.href = "Canvas.html";
+        			location.href = "private/Canvas.html";
         		};
         		socket.onmessage = ({data}) => {
         			//TODO: refresh the maze
