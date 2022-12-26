@@ -35,13 +35,6 @@
     	<canvas id = "MazeGame" width = "1520" height = "760"></canvas>
 	</div>
 	
-	<div>
-    	<p><input type="submit" value="Einfach" onClick="draw()"></p>
-       	<p><input type="submit" value="Mittel" onClick="draw()"></p>
-        <p><input type="submit" value="Schwer" onClick="draw()"></p>
-    	<canvas id = "Options" width = "250" height = "760"></canvas>
-	</div>
-	
 </body>
 
 <script>
@@ -65,6 +58,24 @@ function openWebSocket() {
 		// Some stuff executed on close
 	}
 }
+	
+document.onkeydown = checkKey;
+function checkKey(e){
+	e = e ? e : window.event;		
+	if(e.keyCode == '38'){
+		// up arrow
+		console.log("up arrow pressed (" + e.keyCode + ")");
+	} else if(e.keyCode == '40'){
+		// down arrow
+		console.log("down arrow pressed (" + e.keyCode + ")");
+	} else if(e.keyCode == '37'){
+		// left arrow
+		console.log("left arrow pressed (" + e.keyCode + ")");
+	} else if(e.keyCode == '39'){
+		// right key
+		console.log("right arrow pressed (" + e.keyCode + ")");
+	}
+}		
 
 function move(direction) {
 	// Send ws message with new position and cookies.session_id from http as identification
