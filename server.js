@@ -40,19 +40,27 @@ server.get("/", (req, res) => {
 });
 
 server.post("/getIn", (req, res) => {
-	let playerData = {
-		username: req.body.name,
-		car: req.body.car,
-		left: 100,
-		top: 100
-	}
-	players[req.body.websocket] = playerData;
+	let session_id = req.cookies.session_id;
+	if (session_id === undefined || players[session_id] === undefined) {
+		session_id = JSON.stringify(Math.random());
+		res.cookie("session_id", session_id);
+		let playerData = {
+			username: req.body.name,
+			car: req.body.car,
+			left: 100,
+			top: 100
+		}
+		players[session_id] = playerData;
+	}	
+	console.log("Player got in: ("+session_id+", "+players[session_id].username+", "+players[session_id].car);
+	res.send();
 });
 
 serverSocket.on('connection', function (socket) {
 	console.log("Connection built");
-	socket.onmessage = function incoming(event) {
-		// The current player data is accessable via players[socket]
+	socket.onmessage = function incoming(event) {		
+		// The current player data is accessable via players[key], where
+		// key is the id sent tvia the current ws connection (stored in cookies)		
 		// In event, the current movement is stored
 		// player data has to be updated matching the movement
     }   

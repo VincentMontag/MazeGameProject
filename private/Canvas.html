@@ -46,7 +46,31 @@
 
 <script>
 
+let socket = null;
+let port = null;
 
+function openWebSocket() {
+	console.log("Open websocket");
+	// Create connection to server
+	port = parseInt(location.port)+1;
+	socket = new WebSocket(`ws://${location.hostname}:${port}`);
+	socket.onopen = () => {
+		// open canvas
+	};
+	socket.onmessage = ({data}) => {
+		// This part is executed when a player changed its position. 
+		// We refresh the window that we can see the new position.
+	};
+	socket.onclose = () => {
+		// Some stuff executed on close
+	}
+}
+
+function move(direction) {
+	// Send ws message with new position and cookies.session_id from http as identification
+}
+
+openWebSocket();
 
 </script>
 

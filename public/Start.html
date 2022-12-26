@@ -131,7 +131,7 @@
             <br>
 
             <button class="button highscore" href="" type="Button">Highscore</button>
-            <button class="submit" type="Button" onClick="openWebSocket()">Start</button>
+            <button class="submit" type="Button" onClick="start()">Start</button>
             <a href="javascript:openRules('private/Regeln.html')"><button class="button regeln">Regeln</button></a>
             
             <script>
@@ -162,47 +162,22 @@
               "resizable=yes,status=no,menubar=yes,location=no,scrollbars=yes,toolbar=no");
             }
             
-            let socket = null;
-            let port = null;
-
-            function openWebSocket() {
-            	let username = document.getElementById('username').value;
-            	if (username === undefined || username == "" || username == " ") return;
-            	console.log("Open websocket");
-            	// Create connection to server
-            	port = parseInt(location.port)+1;
-            	socket = new WebSocket(`ws://${location.hostname}:${port}`);
-            	socket.onopen = () => {
-            		console.log("Connection opened!");
-            		start(socket);	
-            	};
-            	socket.onmessage = ({data}) => {
-            		// This part is executed when a player changed its position. 
-            		// We refresh the window that we can see the position.
-            	}
-            	socket.onclose = () => {
-            		// Some stuff executed on close
-            	}
-            }
-            
-            function start(socket) {
+            function start() {
             	// Initialize player
             	let player = {
-            		websocket: socket,
             		name: document.getElementById('username').value,
             		car: slideIndex
-            	}
-            	
+            	}            	
             	var request = new XMLHttpRequest();
-            	request.open("POST", "/getIn", true);
-            	
+            	request.open("POST", "/getIn", true);            	
             	// set `Content-Type` header
-            	request.setRequestHeader('Content-Type', 'application/json')
-
+            	request.setRequestHeader('Content-Type', 'application/json');
             	// send rquest with JSON payload
             	request.send(JSON.stringify(player)); 
             	
-            	location.href = "private/Canvas.html";
+            	request.onload = function () {
+            		location.href = "private/Canvas.html";
+            	};
         		
             }
             
