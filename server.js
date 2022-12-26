@@ -5,11 +5,11 @@
 // express server
 const express = require("express");
 const server = express();
-//const cookieparser = require("cookie-parser");
+const cookieparser = require("cookie-parser");
 const fs = require("fs");
 const path = require("path");
 
-//server.use(cookieparser());
+server.use(cookieparser());
 // The folder with all html files
 server.use(express.static("."));
 server.set("view engine", "ejs");
@@ -39,16 +39,22 @@ server.get("/", (req, res) => {
     res.send(data);
 });
 
+server.post("/getIn", (req, res) => {
+	let playerData = {
+		username: req.body.name,
+		car: req.body.car,
+		left: 100,
+		top: 100
+	}
+	players[req.body.websocket] = playerData;
+});
+
 serverSocket.on('connection', function (socket) {
 	console.log("Connection built");
 	socket.onmessage = function incoming(event) {
-		let player = JSON.parse(event.data);
-		//TODO: add a session id stored in the cookies
-		
-		// By the way, onmessage isn't called when invoking socket.send(player) in 
-		// Start.html->start()->last_line_of_code. It should be called...
-		players.push(player);
-		console.log(player.name+" logged in with car "+player.car);
-    }    
+		// The current player data is accessable via players[socket]
+		// In event, the current movement is stored
+		// player data has to be updated matching the movement
+    }   
     
 });

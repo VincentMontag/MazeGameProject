@@ -131,13 +131,10 @@
             <br>
 
             <button class="button highscore" href="" type="Button">Highscore</button>
-            <button class="submit" type="Button" onClick="start()">Start</button>
+            <button class="submit" type="Button" onClick="openWebSocket()">Start</button>
             <a href="javascript:openRules('private/Regeln.html')"><button class="button regeln">Regeln</button></a>
             
             <script>
-            
-            let socket = null;
-        	let port = null;
             
             let slideIndex = 1;
             showSlides(slideIndex);
@@ -165,31 +162,48 @@
               "resizable=yes,status=no,menubar=yes,location=no,scrollbars=yes,toolbar=no");
             }
             
-            function start() {
+            let socket = null;
+            let port = null;
+
+            function openWebSocket() {
+            	let username = document.getElementById('username').value;
+            	if (username === undefined || username == "" || username == " ") return;
+            	console.log("Open websocket");
+            	// Create connection to server
+            	port = parseInt(location.port)+1;
+            	socket = new WebSocket(`ws://${location.hostname}:${port}`);
+            	socket.onopen = () => {
+            		console.log("Connection opened!");
+            		start(socket);	
+            	};
+            	socket.onmessage = ({data}) => {
+            		// This part is executed when a player changed its position. 
+            		// We refresh the window that we can see the position.
+            	}
+            	socket.onclose = () => {
+            		// Some stuff executed on close
+            	}
+            }
+            
+            function start(socket) {
             	// Initialize player
             	let player = {
+            		websocket: socket,
             		name: document.getElementById('username').value,
             		car: slideIndex
             	}
             	
-            	// Create connection to server
-            	port = parseInt(location.port)+1;
-        		socket = new WebSocket(`ws://${location.hostname}:${port}`);
-        		console.log("After socket initialization");
-        		socket.onopen = () => {
-        			console.log("Connection opened!");
-        			// TODO ...
-        			location.href = "private/Canvas.html";
-        		};
-        		socket.onmessage = ({data}) => {
-        			//TODO: refresh the maze
-        		}
-        		socket.onclose = () => {
-        			// Some stuff executed on close
-        		}
+            	var request = new XMLHttpRequest();
+            	request.open("POST", "/getIn", true);
+            	
+            	// set `Content-Type` header
+            	request.setRequestHeader('Content-Type', 'application/json')
+
+            	// send rquest with JSON payload
+            	request.send(JSON.stringify(player)); 
+            	
+            	location.href = "private/Canvas.html";
         		
-        		// Provide the server with the chosen player data
-        		socket.send(player);
             }
             
             </script>
