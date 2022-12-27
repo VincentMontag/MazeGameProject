@@ -1,3 +1,14 @@
+
+function addPlayer(id, name, car) {
+	console.log("add: "+id+" "+name+" "+car);
+}
+
+function movePlayer(id, dir) {
+	console.log("move: "+id+" "+dir);
+}
+
+module.exports = { addPlayer, movePlayer };
+
 // Box width 1520
 const bw = 1320;
 
@@ -8,8 +19,8 @@ const bh = 660;
 const p = 0;
 
 // Context
-const mazegame = document.getElementById("MazeGame");
-const mazegame2d = mazegame.getContext("2d");
+const mazegame = null;//document.getElementById("MazeGame");
+const mazegame2d = null;//mazegame.getContext("2d");
 		
 // Modes
 const hardMode = 20;

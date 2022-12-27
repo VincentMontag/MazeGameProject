@@ -2,6 +2,9 @@
  * The MazeRace
  */
  
+// Maze.js
+const maze = require("./Maze.js"); 
+ 
 // express server
 const express = require("express");
 const server = express();
@@ -51,8 +54,9 @@ server.post("/getIn", (req, res) => {
 			top: 100
 		}
 		players[session_id] = playerData;
-	}	
-	console.log("Player got in: ("+session_id+", "+players[session_id].username+", "+players[session_id].car);
+		maze.addPlayer(session_id, playerData.username, playerData.car);
+	}
+	console.log("Player got in: ("+session_id+", "+players[session_id].username+", "+players[session_id].car+")");
 	res.send();
 });
 
@@ -60,11 +64,14 @@ serverSocket.on('connection', function (socket) {
 	console.log("Connection built");
 	socket.onmessage = function incoming(event) {
 		let action = JSON.parse(event.data);	
-		console.log(action.id+" "+action.dir);
-		// The current player data is accessable via players[key], where
-		// key is the id sent tvia the current ws connection (stored in cookies)		
-		// In event, the current movement is stored
-		// player data has to be updated matching the movement
-    }   
-    
+		if (maze.movePlayer(action.id, action.dir)) {
+			// Update player data
+			// players[action.id].left += ... depended on action.dir
+			// send refresh message to all clients
+		};		
+    };
+    socket.onclose = function (event) {
+		// The ws communication has been cancelled here.
+		// We could mark the player grey to show that he isn't available
+	};
 });
