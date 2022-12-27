@@ -71,15 +71,23 @@ function checkKey(e){
 	} else if(e.keyCode == '39'){
 		move("right");
 	}
-}		
+}
+
+function getCookie(name) {
+	let cookie = {};
+	document.cookie.split(';').forEach(function(el) {
+		let [k,v] = el.split('=');
+		cookie[k.trim()] = v;
+	});
+	return cookie[name];
+}
 
 function move(direction) {
 	let action = {
-		//id: document.cookie (parse it by using cookie-parser to get the cookie 'session_id')
+		id: getCookie("session_id"),
 		dir: direction
 	};
 	socket.send(JSON.stringify(action));
-	// Send ws message with new position and cookies.session_id from http as identification
 }
 
 openWebSocket();

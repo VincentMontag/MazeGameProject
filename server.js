@@ -58,7 +58,9 @@ server.post("/getIn", (req, res) => {
 
 serverSocket.on('connection', function (socket) {
 	console.log("Connection built");
-	socket.onmessage = function incoming(event) {		
+	socket.onmessage = function incoming(event) {
+		let action = JSON.parse(event.data);	
+		console.log(action.id+" "+action.dir);
 		// The current player data is accessable via players[key], where
 		// key is the id sent tvia the current ws connection (stored in cookies)		
 		// In event, the current movement is stored
