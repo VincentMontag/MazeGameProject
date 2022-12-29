@@ -4,6 +4,8 @@
  
 // Maze.js
 const maze = require("./Maze.js"); 
+
+var Direction = require('./Direction.js');
  
 // express server
 const express = require("express");
@@ -34,7 +36,7 @@ server.listen(portnumber, function ()  {
 const WebSocket = require("ws");
 const serverSocket = new WebSocket.Server({ port: (portnumber+1) });
 
-players = {}
+players1 = {}
 
 // Start
 server.get("/", (req, res) => {
@@ -47,27 +49,46 @@ server.post("/getIn", (req, res) => {
 	if (session_id === undefined || players[session_id] === undefined) {
 		session_id = JSON.stringify(Math.random());
 		res.cookie("session_id", session_id);
+		maze.addPlayer(session_id);
 		let playerData = {
 			username: req.body.name,
 			car: req.body.car,
-			left: 100,
-			top: 100
+			left: maze.getX(session_id),
+			top: maze.getY(session_id),
+			direction: "RIGHT"
 		}
-		players[session_id] = playerData;
-		maze.addPlayer(session_id, playerData.username, playerData.car);
+		players1[session_id] = playerData;		
 	}
-	console.log("Player got in: ("+session_id+", "+players[session_id].username+", "+players[session_id].car+")");
+	console.log("Player got in: ("+
+		session_id+", "+
+		players1[session_id].username+", "+
+		players1[session_id].car+", "+
+		players1[session_id].left+", "+
+		players1[session_id].top+", "+
+		players1[session_id].direction+")");
 	res.send();
 });
 
 serverSocket.on('connection', function (socket) {
 	console.log("Connection built");
+	
 	socket.onmessage = function incoming(event) {
-		let action = JSON.parse(event.data);	
-		if (maze.movePlayer(action.id, action.dir)) {
-			// Update player data
-			// players[action.id].left += ... depended on action.dir
-			// send refresh message to all clients
+		let action = JSON.parse(event.data);
+		if (maze.movePlayer(action.id, Direction.get(action.dir))) {
+			
+			// Update player data on server
+			players1[action.id].left = maze.getX(action.id);
+			players1[action.id].top = maze.getY(action.id);
+			players1[action.id].direction = action.dir;
+			
+			// Prepare update data and send it
+			let update = {
+				id: action.id,
+				player: players1[action.id]
+			}
+			serverSocket.clients.forEach(function each(client) {
+				client.send(JSON.stringify(update));
+			});
 		};		
     };
     socket.onclose = function (event) {

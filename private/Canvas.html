@@ -42,6 +42,8 @@
 let socket = null;
 let port = null;
 
+playerData = {}
+
 function openWebSocket() {
 	console.log("Open websocket");
 	// Create connection to server
@@ -50,9 +52,15 @@ function openWebSocket() {
 	socket.onopen = () => {
 		// open canvas
 	};
-	socket.onmessage = ({data}) => {
-		// This part is executed when a player changed its position. 
-		// We refresh the window that we can see the new position.
+	socket.onmessage = (event) => {
+		let update = JSON.parse(event.data);
+		playerData[update.id] = update.player;
+		console.log("Client "+update.id+" needs to get updated with the following data:");
+		console.log(playerData[update.id].username+" "+playerData[update.id].car+" "+playerData[update.id].left+" "+
+				playerData[update.id].top+" "+playerData[update.id].direction);
+		// Perhaps it isn't necessary to store all players.
+		// There has to be a div-tag located relativley to the upper left corner of the canvas.
+		// In this div tag the player is drawn with the data available in update.player.
 	};
 	socket.onclose = () => {
 		// Some stuff executed on close
@@ -63,13 +71,13 @@ document.onkeydown = checkKey;
 function checkKey(e){
 	e = e ? e : window.event;		
 	if(e.keyCode == '38'){
-		move("up");
+		move("UP");
 	} else if(e.keyCode == '40'){
-		move("down");
+		move("DOWN");
 	} else if(e.keyCode == '37'){
-		move("left");
+		move("LEFT");
 	} else if(e.keyCode == '39'){
-		move("right");
+		move("RIGHT");
 	}
 }
 

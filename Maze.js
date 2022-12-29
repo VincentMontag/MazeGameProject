@@ -1,14 +1,75 @@
 
-function addPlayer(id, name, car) {
-	console.log("add: "+id+" "+name+" "+car);
+const Direction = require('./Direction.js');
+
+const SCALE = 10;
+
+players = {}
+
+class Player {
+	
+	constructor(x, y) {
+		this.x = x;
+		this.y = y;
+		this.dir = Direction.RIGHT;
+	}
+	
+	// Performes the movement through the whole maze
+	// hintedMaze = true if the movement should be performed in the hinted maze
+	// time = x, where x is the delay in each single move
+	autoMove(time, hintedMaze) {
+		//TODO Timer instead of while(true)
+		while (true) {
+			if (isAllowed(this.x, this.y, this.dir.left(), hintedMaze)) {
+				move(this.dir.left(), hintedMaze); 
+				this.dir = this.dir.left();
+			} else if (isAllowed(this.x, this.y, this.dir, hintedMaze)) 
+				move(this.dir, hintedMaze);
+			else if (isAllowed(this.x, this.y, this.dir.left().left(), hintedMaze)) 
+				this.dir = this.dir.left().left();
+			else 
+				this.dir = this.dir.left().left().left();
+			//if (time > 0) Thread.sleep(time);
+			if (this.x == 0 && this.y == 1) return false;
+			//else if (x == Main.WIDTH + 1) return true;		
+		}
+	}
+	
+	// Moves the player if it is allowed.
+	// dir is a matching string
+	// hintedMaze = true, if the move should be performed in the hintedMaze
+	move(direction, hintedMaze) {
+		if (isAllowed(this.x, this.y, direction, hintedMaze)) {
+			this.dir = direction;
+			if (direction.equal(Direction.UP)) this.y--;
+			else if (direction.equal(Direction.LEFT)) this.x--;
+			else if (direction.equal(Direction.RIGHT)) this.x++;
+			else if (direction.equal(Direction.DOWN)) this.y++;
+			//if (this.x == Main.WIDTH + 1) console.log("Player reached target");
+			return true;
+		}
+		return false;
+	}
+	
+}
+function addPlayer(id) {
+	players[id] = new Player(0, 1);
 }
 
-function movePlayer(id, dir) {
-	console.log("move: "+id+" "+dir);
+function movePlayer(id, direction) {
+	return players[id].move(direction, false);
 }
 
-module.exports = { addPlayer, movePlayer };
+function getX(id) {
+	return players[id].x * SCALE;
+}
 
+function getY(id) {
+	return players[id].y * SCALE;
+}
+
+module.exports = { addPlayer, movePlayer, getX, getY };
+
+/*
 // Box width 1520
 const bw = 1320;
 
@@ -65,67 +126,7 @@ function activateNewMaze(counter) {
 	drawMaze();
 }
 
-class Player {
-	 // current direction
-	direction = Direction.RIGHT;
-	
-	constructor(x, y, image) {
-		this.x = x;
-		this.y = y;
-		this.image = image;
-	}
-	
-	// Performes the movement through the whole maze
-	// hintedMaze = true if the movement should be performed in the hinted maze
-	// time = x, where x is the delay in each single move
-	autoMove(time, hintedMaze) {
-		current = Direction.RIGHT;
-		while (true) {
-			if (isAllowed(x, y, current.left(), hintedMaze)) {
-				move(current.left(), hintedMaze); 
-				current = current.left();
-			} else if (isAllowed(x, y, current, hintedMaze)) 
-				move(current, hintedMaze);
-			else if (isAllowed(x, y, current.left().left(), hintedMaze)) 
-				current = current.left().left();
-			else 
-				current = current.left().left().left();
-			//if (time > 0) Thread.sleep(time);
-			if (x == 0 && y == 1) return false;
-			else if (x == Main.WIDTH + 1) return true;		
-		}
-	}
-	
-	// Moves the player if it is allowed.
-	// dir is a matching string
-	// hintedMaze = true, if the move should be performed in the hintedMaze
-	move(dir, hintedMaze) {
-		if (isAllowed(x, y, dir, hintedMaze)) {
-			direction = dir;
-			if (direction.equal("UP")) y--;
-			else if (direction.equal("LEFT")) x--;
-			else if (direction.equal("RIGHT")) x++;
-			else if (direction.equal("DOWN")) y++;
-		}
-		if (x == Main.WIDTH + 1) console.log("Player reached target");
-		if (!hintedMaze) draw(context);
-	}
-	
-	draw(context) {
-		let storedTransform = context.getTransform();
-		context.translate(mode * (x + 0.5), mode * (y + 0.5));
-		if (curDir.equal("RIGHT")) context.rotate(- Math.PI / 2);
-		else if (curDir.equal("UP")) context.rotate(- Math.PI / 2);
-		else if (curDir.equal("LEFT")) context.rotate(- Math.PI / 2);	
-		var image = new Image();
-		image.onload = function () {
-			context.drawImage(image, - mode / 2, - mode / 2);
-    	};
-    	image.src = 'pixelart/player_blue.png';
-		context.setTransform(storedTransform);
-	}
-	
-}
+
 
 //===============================================================================
 // Methods for creating the maze
@@ -185,16 +186,16 @@ Proves if you can move into the given direction startet at x, y.
 hintedMaze = true if this step should be performed on the hinted maze
 */
 function isAllowed(x, y, direction, hintedMaze) {
-	if (direction.equal("RIGHT") &&
+	if (direction.equal(Direction.RIGHT) &&
 		(hasWall(x, y, Direction.RIGHT, hintedMaze) || hasWall(x + 1, y, Direction.LEFT, hintedMaze))) 
 			return false;
-	if (direction.equal("UP") && 
+	if (direction.equal(Direction.UP) && 
 		(hasWall(x, y, Direction.UP, hintedMaze) || hasWall(x, y - 1, Direction.DOWN, hintedMaze)))
 			return false;
-	if (direction.equal("LEFT") &&
+	if (direction.equal(Direction.LEFT) &&
 		(hasWall(x, y, Direction.LEFT, hintedMaze) || hasWall(x - 1, y, Direction.RIGHT, hintedMaze)))
 			return false;
-	if (direction.equal("DOWN") &&
+	if (direction.equal(Direction.DOWN) &&
 		(hasWall(x, y, Direction.DOWN, hintedMaze) || hasWall(x, y + 1, Direction.UP, hintedMaze)) )
 			return false;
 	return true;
@@ -205,6 +206,7 @@ Checks if there is a wall at (x, y) in direction d.
 hinted = true if the check should be proceeded on the hinted maze
 */	
 function hasWall(x, y, d, hinted) {
+	return false;
 	if (x < 0 || y < 0 || x > Main.WIDTH + 1 || y > Main.HEIGHT + 1) return true;
 	return (((hinted ? hintedMaze[y][x] : maze[y][x]) >> d.num) & 0b1) == 1; 
 }
@@ -213,6 +215,7 @@ function hasWall(x, y, d, hinted) {
 Draws the maze once.
 When drawing again, the screen has to be cleaned.
 */
+/*
 function drawMaze(){
 	
 	    
@@ -267,4 +270,4 @@ function drawMaze(){
 		mazegame2d.stroke();
 		
 		    
-}
+}*/

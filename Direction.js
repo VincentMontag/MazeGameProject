@@ -11,17 +11,19 @@ class Direction{
 	static LEFT = new Direction(2);
 	static DOWN = new Direction(3);
 	
- 	constructor(num){
- 	
+ 	constructor(num){ 	
  		this.num = num;
 	}
 	
+	static get(name) {
+		if (name == "RIGHT") return Direction.RIGHT;
+		else if (name == "UP") return Direction.UP;
+		else if (name == "LEFT") return Direction.LEFT;
+		else if (name == "DOWN") return Direction.DOWN;
+	}
+	
 	equal(direction) {
-		if (this.num == 0 && direction == "RIGHT") return true;
-		if (this.num == 1 && direction == "UP") return true;
-		if (this.num == 2 && direction == "LEFT") return true;
-		if (this.num == 3 && direction == "DOWN") return true;
-		return false;
+		return this.num == direction.num;
 	}
 	
  	left(){
@@ -36,3 +38,5 @@ class Direction{
  		}
  	}
 }
+
+module.exports = Direction;
