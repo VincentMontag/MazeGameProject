@@ -9,138 +9,216 @@
       }
         * {box-sizing: border-box}
         body {
-          font-family: Verdana, sans-serif; 
-          margin:0;
-          margin: 30px;
-          background-color: lightyellow;
-        }
-        .mySlides {display: none}
-        img {vertical-align: middle;}
-
-        .AutoAuswahl {
-        max-width: 1000px;
-        position: 50%;
-        margin: 8%;
+        background-color: lightyellow;
+        font-family: Arial, sans-serif;
+        color: black;
+        line-height: 1.5;
+        text-align: center;
         }
 
-       button {
-        position: 50%;
-        max-width: 1000px;
-        margin: 10px;
-        font-weight: bold;
-        padding: 10px;
-       }
-
-       .pfeil {
-        position: absolute;
-        font-size: 30px;
-        font-weight: bold;
+        .space { 
+        height: 100%;
+        width: 30%;
         display: flex;
+        align-items: center;
         justify-content: center;
-        width: 15%;
-        user-select: none;
+        background-color: greenyellow;
+        margin: 0 auto;;
+        }
+        
+        .space::before {  
+            content: "";
+            background-image: url('../pixelart/space.png');
+            background-size: cover;
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            bottom: 0px;
+            left: 0px;
+            opacity: 0.7;
+        }
+        .bottom-background{
+          background-image: linear-gradient(to right, greenyellow 2px, transparent 2px), linear-gradient(to bottom, greenyellow 2px, transparent 2px);
+          background-size: 20px 20px;
+          width: 50%;
+          height: 95vh;
+          bottom: 0;
+          position: absolute;
+          transform: perspective(400px) rotateX(70deg) scale(2);
+          
+          
+        }
+
+        .text {
+        position: relative;
+        font-size: 14rem;
+        line-height: 0.9;
+        text-align: center;
+        }
+
+        .header{
+          font-size: xx-large;
+          
+          padding: 10px;
+          width: 100%;
+          margin: 0 auto;
+          text-align: center;
+        }
+
+        .container{
+            width:70%;
+            position: relative;
+            font-size: large;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .pfeil {
+        height: auto;
+        font-weight: bold;
         cursor: pointer;
-        top: auto;
+        font-size: 50px;
+        position: relative;
         padding: 16px;
-        margin-top: auto;
-        transition: 0.6s ease;
-        border-radius: 0 3px 3px 0;
        }
 
        .pfeil:hover{
           color: red;
        }
 
-       .pfeil-prev{
-          left: 0;
+       .pfeil.pfeil-prev{
+          float: left;
+          width: 25%;
+          text-align: left;
        }
 
-       .pfeil-next{
-          right: 20;
+       .pfeil.pfeil-next{
+          float: right;
+          width: 25%;
+          text-align: right;
        }
+       .car{
+        width: 50%;
+        height: 50%;
+        margin: 0 auto;
+        text-align: center;
+        position: relative;
+       }
+
+       img {
+          height: 125px;
+          width: 125px;
+          vertical-align: middle;
+          max-width: 100%;
+          max-height: 100%;
+        }
 
         .numbertext {
         color: black;
         font-weight: bold;
-        font-size: 12px;
+        font-size: medium;
         padding: 8px 12px;
         position: center;
         top: auto;
         }
+
+        button {
+        position: relative;
+        max-width: 1000px;
+        margin: 10px;
+        font-weight: bold;
+        padding: 10px;
+       }
+
+       .content{
+        text-align: left;
+       }
+
     </style>
         <title>Labyrinth</title>
     </head>
+    
     <body>
-      <h1>Das Maze-Race</h1>
-        <label>Bitte einen Nutzernamen eingeben: 
-        	<input type="text" id="username" placeholder="Nutzername..."/> 
-        </label>
-        <p></p>
-        Bitte ein Auto auswählen:
-        <p></p>
-        <div class="AutoAuswahl">
-
-          <a class="pfeil pfeil-prev" onclick="plusSlides(-1)"><span>&#10094;</span></a>
-          <a class="pfeil pfeil-next" onclick="plusSlides(1)"><span>&#10095;</span></a>
-            <div class="car">
-              <div class="numbertext">1 / 10</div>
-              <img src="../pixelart/player_blue.png">
-            </div>
+        <div class="space">
             
-            <div class="car">
-              <div class="numbertext">2 / 10</div>
-              <img src="../pixelart/player_brown.png">
-            </div>
+            <div class="container">
+                <div class="header">Das Maze-Race</div>
+                <div class="content">Bitte einen Nutzernamen eingeben: 
+                    <input type="text" id="username" placeholder="Nutzername..."/> 
+                    <p></p>
+                    Bitte ein Auto auswählen:
+                  
+                    <p></p>
+                    <br>
+                    <br>
+                </div>
+                <div class="AutoAuswahl">
+
+                    <a class="pfeil pfeil-prev" onclick="plusSlides(-1)"><span>&#10094;</span></a>
+                    <a class="pfeil pfeil-next" onclick="plusSlides(1)"><span>&#10095;</span></a>
             
-            <div class="car">
-              <div class="numbertext">3 / 10</div>
-              <img src="../pixelart/player_green.png">
-            </div>
-
-            <div class="car">
-                <div class="numbertext">4 / 10</div>
-                <img src="../pixelart/player_grey.png">
-            </div>
-
-            <div class="car">
-                <div class="numbertext">5 / 10</div>
-                <img src="../pixelart/player_orange.png">
-            </div>
-
-            <div class="car">
-                <div class="numbertext">6 / 10</div>
-                <img src="../pixelart/player_pink.png">
-            </div>
-
-            <div class="car">
-                <div class="numbertext">7 / 10</div>
-                <img src="../pixelart/player_purple.png">
-            </div>
-
-            <div class="car">
-                <div class="numbertext">8 / 10</div>
-                <img src="../pixelart/player_red.png">
-            </div>
-
-            <div class="car">
-                <div class="numbertext">9 / 10</div>
-                <img src="../pixelart/player_white.png">
-            </div>
-
-            <div class="car">
-                <div class="numbertext">10 / 10</div>
-                <img src="../pixelart/player_yellow.png">
-            </div>
+                    <div class="car">
+                      <div class="numbertext">1 / 10</div>
+                      <img src="../pixelart/player_blue.png">
+                    </div>
+                    
+                    <div class="car">
+                      <div class="numbertext">2 / 10</div>
+                      <img src="../pixelart/player_brown.png">
+                    </div>
+                    
+                    <div class="car">
+                      <div class="numbertext">3 / 10</div>
+                      <img src="../pixelart/player_green.png">
+                    </div>
             
-            </div>
-            <br>
-            <br>
-
-            <button class="button highscore" href="" type="Button">Highscore</button>
-            <button class="submit" type="Button" onClick="start()">Start</button>
-            <a href="javascript:openRules('../private/Regeln.html')"><button class="button regeln">Regeln</button></a>
+                    <div class="car">
+                        <div class="numbertext">4 / 10</div>
+                        <img src="../pixelart/player_grey.png">
+                    </div>
             
-            <script>
+                    <div class="car">
+                        <div class="numbertext">5 / 10</div>
+                        <img src="../pixelart/player_orange.png">
+                    </div>
+            
+                    <div class="car">
+                        <div class="numbertext">6 / 10</div>
+                        <img src="../pixelart/player_pink.png">
+                    </div>
+            
+                    <div class="car">
+                        <div class="numbertext">7 / 10</div>
+                        <img src="../pixelart/player_purple.png">
+                    </div>
+            
+                    <div class="car">
+                        <div class="numbertext">8 / 10</div>
+                        <img src="../pixelart/player_red.png">
+                    </div>
+            
+                    <div class="car">
+                        <div class="numbertext">9 / 10</div>
+                        <img src="../pixelart/player_white.png">
+                    </div>
+            
+                    <div class="car">
+                        <div class="numbertext">10 / 10</div>
+                        <img src="../pixelart/player_yellow.png">
+                    </div>  
+                    <br>
+                    <br>
+                </div>
+                <button class="button highscore" href="" type="Button">Highscore</button>
+                <button class="submit" type="Button" onClick="start()">Start</button>
+                <a href="javascript:openRules('../private/Regeln.html')"><button class="button regeln">Regeln</button></a>
+            </div>
+            <div class="bottom-background"></div>
+        </div>
+        
+       
+      
+        <script>
             
             let slideIndex = 1;
             showSlides(slideIndex);
@@ -186,6 +264,6 @@
             	};
             }
             
-            </script>
+        </script>
     </body>
 </html>
