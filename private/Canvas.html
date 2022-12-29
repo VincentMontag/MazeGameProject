@@ -42,25 +42,33 @@
 let socket = null;
 let port = null;
 
-playerData = {}
-
 function openWebSocket() {
 	console.log("Open websocket");
 	// Create connection to server
 	port = parseInt(location.port)+1;
 	socket = new WebSocket(`ws://${location.hostname}:${port}`);
 	socket.onopen = () => {
-		// open canvas
+		// Some stuff executed on open
 	};
 	socket.onmessage = (event) => {
 		let update = JSON.parse(event.data);
-		playerData[update.id] = update.player;
+		
 		console.log("Client "+update.id+" needs to get updated with the following data:");
-		console.log(playerData[update.id].username+" "+playerData[update.id].car+" "+playerData[update.id].left+" "+
-				playerData[update.id].top+" "+playerData[update.id].direction);
-		// Perhaps it isn't necessary to store all players.
-		// There has to be a div-tag located relativley to the upper left corner of the canvas.
-		// In this div tag the player is drawn with the data available in update.player.
+		console.log(update.player.username+" "+update.player.car+" "+update.player.left+" "+
+				update.player.top+" "+update.player.direction);
+		
+		// There could be a div tag or something else for each car to be drawn.
+		// Such a div tag has to appear !ON! the canvas. That means canvas has z-index 0
+		// and each div tag z-index 1.
+		// Each div-tag has an id to identify the player. The player id is given by update.id
+		// Then you can look if a tag with this id already exists by ...getElementByID(...)
+		// If it exists update the positions (position of the div-tag) with data 
+		// update.player.left and update.player.right
+		// If it not exists create a new tag with the data. (ID, position and image)
+		// Draw the image in the div tag (image index is stored in update.player.car 
+		// (the same as Sophies slide indices))
+		// The direction of the image can be detemrined by using update.player.direction
+		
 	};
 	socket.onclose = () => {
 		// Some stuff executed on close
