@@ -12,12 +12,19 @@
     		margin: 1%;
     	}
     	
+    	.car {
+    		z-index: 1;
+    		position: absolute;
+    		width: 64px;
+    		height: 64px;
+    	}
+    	
     	canvas{
     		border: 2px solid black;
     		margin: 0;
     		display:block;	
     		float: left;
- 
+ 			z-index: 0;
     	}
     	
     	body {
@@ -27,14 +34,10 @@
     </style>
     	
 </head>
-<body>
-
-	<h1>Welcome to our Web-Project: The Maze Game</h1>
-	
-	<div>
+<body>	
+	<div id="game">
     	<canvas id = "MazeGame" width = "1520" height = "760"></canvas>
-	</div>
-	
+	</div>	
 </body>
 
 <script>
@@ -48,36 +51,30 @@ function openWebSocket() {
 	port = parseInt(location.port)+1;
 	socket = new WebSocket(`ws://${location.hostname}:${port}`);
 	socket.onopen = () => {
-		// Some stuff executed on open
+		move("");
 	};
 	socket.onmessage = (event) => {
-		let update = JSON.parse(event.data);
+		let update = JSON.parse(event.data);		
+		let playerTag = document.querySelector(`#p${update.id}`);
 		
-		console.log("Client "+update.id+" needs to get updated with the following data:");
-		console.log(update.player.username+" "+update.player.car+" "+update.player.left+" "+
-				update.player.top+" "+update.player.direction);
-		
-		let a1 = document.createElement('../pixelart/player_blue.png');
-		let a2 = document.createElement('../pixelart/player_brown.png');
-		let a3 = document.createElement('../pixelart/player_green.png');
-		let a4 = document.createElement('../pixelart/player_grey.png');
-		let a5 = document.createElement('../pixelart/player_orange.png');
-		let a6 = document.createElement('../pixelart/player_pink.png');
-		let a7 = document.createElement('../pixelart/player_purble.png');
-		let a8 = document.createElement('../pixelart/player_red.png');
-		let a9 = document.createElement('../pixelart/player_white.png');
-		let a10 = document.createElement('../pixelart/player_yellow.png');
-		// There could be a div tag or something else for each car to be drawn.
-		// Such a div tag has to appear !ON! the canvas. That means canvas has z-index 0
-		// and each div tag z-index 1.
-		// Each div-tag has an id to identify the player. The player id is given by update.id
-		// Then you can look if a tag with this id already exists by ...getElementByID(...)
-		// If it exists update the positions (position of the div-tag) with data 
-		// update.player.left and update.player.right
-		// If it not exists create a new tag with the data. (ID, position and image)
-		// Draw the image in the div tag (image index is stored in update.player.car 
-		// (the same as Sophies slide indices))
-		// The direction of the image can be detemrined by using update.player.direction
+		// Create new player on the screen
+		if (playerTag == null) {
+			let node = document.createElement("div");
+			node.setAttribute("class", "car");
+			node.setAttribute("id", `p${update.id}`);
+			node.setAttribute("style", `left: ${update.player.left}px; 
+										top: ${update.player.top}px; 
+										background-image: url(${update.player.car});
+										transform: rotate(${update.player.direction}deg);`);
+			document.querySelector("#game").appendChild(node);
+			
+		// Update player	
+		} else {
+			playerTag.setAttribute("style", `left: ${update.player.left}px; 
+											top: ${update.player.top}px;
+											background-image: url(${update.player.car});
+											transform: rotate(${update.player.direction}deg);`);
+		}
 		
 	};
 	socket.onclose = () => {

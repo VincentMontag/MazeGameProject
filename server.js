@@ -52,10 +52,10 @@ server.post("/getIn", (req, res) => {
 		maze.addPlayer(session_id);
 		let playerData = {
 			username: req.body.name,
-			car: req.body.car,
+			car: getImagePath(req.body.car),
 			left: maze.getX(session_id),
 			top: maze.getY(session_id),
-			direction: "RIGHT"
+			direction: 270
 		}
 		players1[session_id] = playerData;		
 	}
@@ -74,21 +74,22 @@ serverSocket.on('connection', function (socket) {
 	
 	socket.onmessage = function incoming(event) {
 		let action = JSON.parse(event.data);
-		if (maze.movePlayer(action.id, Direction.get(action.dir))) {
+		
+		// A player joined the game
+		if (action.dir == "") {
+			sendDataFromEveryoneToPlayer(socket);
+			sendPlayerDataToEveryone(serverSocket, action.id);			
+		
+		// A player moves
+		} else if (maze.movePlayer(action.id, Direction.get(action.dir))) {
 			
 			// Update player data on server
 			players1[action.id].left = maze.getX(action.id);
 			players1[action.id].top = maze.getY(action.id);
-			players1[action.id].direction = action.dir;
+			players1[action.id].direction = getAngle(action.dir);
 			
 			// Prepare update data and send it
-			let update = {
-				id: action.id,
-				player: players1[action.id]
-			}
-			serverSocket.clients.forEach(function each(client) {
-				client.send(JSON.stringify(update));
-			});
+			sendPlayerDataToEveryone(serverSocket, action.id);
 		};		
     };
     socket.onclose = function (event) {
@@ -96,3 +97,48 @@ serverSocket.on('connection', function (socket) {
 		// We could mark the player grey to show that he isn't available
 	};
 });
+
+// If a new player joined the game he has to draw all the active players
+function sendDataFromEveryoneToPlayer(socket) {
+	for (ids in players1) {				
+		let update = {
+			id: ids.substring(2),
+			player: players1[ids]
+		}
+		socket.send(JSON.stringify(update))
+	}
+}
+
+// If a player moved or joined tha game everyone has to update this player data
+function sendPlayerDataToEveryone(serverSocket, actionid) {
+	let update = {
+		id: actionid.substring(2),
+		player: players1[actionid]
+	}
+	serverSocket.clients.forEach(function each(client) {
+		client.send(JSON.stringify(update));
+	});
+}
+
+function getImagePath(i) {
+	let path = "";
+	if (i == 1) path = '../pixelart/player_blue.png';
+	else if (i == 2) path = '../pixelart/player_brown.png';
+	else if (i == 3) path = '../pixelart/player_green.png';
+	else if (i == 4) path = '../pixelart/player_grey.png';
+	else if (i == 5) path = '../pixelart/player_orange.png';
+	else if (i == 6) path = '../pixelart/player_pink.png';
+	else if (i == 7) path = '../pixelart/player_purble.png';
+	else if (i == 8) path = '../pixelart/player_red.png';
+	else if (i == 9) path = '../pixelart/player_white.png';
+	else if (i == 10) path = '../pixelart/player_yellow.png';
+	return path;
+}
+
+function getAngle(direction) {
+	let angle = 0;
+	if (direction == "RIGHT") angle = 270;
+	else if (direction == "LEFT") angle = 90;
+	else if (direction == "UP") angle = 180;
+	return angle;
+}
