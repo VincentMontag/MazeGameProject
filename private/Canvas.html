@@ -93,7 +93,10 @@ function openWebSocket() {
 			
 		// Update player	
 		} else {
-			playerTag.setAttribute("style", `left: ${update.player.left}px; 
+			if (update.player.status == "dead") 
+				playerTag.remove();
+			else
+				playerTag.setAttribute("style", `left: ${update.player.left}px; 
 											top: ${update.player.top}px;
 											background-image: url(${update.player.car});
 											transform: rotate(${update.player.direction}deg);`);
@@ -101,7 +104,7 @@ function openWebSocket() {
 		
 	};
 	socket.onclose = () => {
-		// Some stuff executed on close
+		console.log("socket closed in client");
 	}
 }
 	
@@ -137,6 +140,16 @@ function move(direction) {
 }
 
 openWebSocket();
+
+// Set canvas size
+function setCanvasSize() {
+	document.querySelector('#MazeGame').setAttribute("width", window.innerWidth - 80);
+	document.querySelector('#MazeGame').setAttribute("height", window.innerHeight - 80);
+}
+window.onresize = function(event) {
+	setCanvasSize();
+};
+setCanvasSize();
 
 </script>
 

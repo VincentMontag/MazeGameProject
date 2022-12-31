@@ -46,7 +46,7 @@ server.get("/", (req, res) => {
 
 server.post("/getIn", (req, res) => {
 	let session_id = req.cookies.session_id;
-	if (session_id === undefined || players[session_id] === undefined) {
+	if (session_id === undefined || players1[session_id] === undefined) {
 		session_id = JSON.stringify(Math.random());
 		res.cookie("session_id", session_id);
 		maze.addPlayer(session_id);
@@ -55,7 +55,8 @@ server.post("/getIn", (req, res) => {
 			car: getImagePath(req.body.car),
 			left: maze.getX(session_id),
 			top: maze.getY(session_id),
-			direction: 270
+			direction: 270,
+			status: 'playing'
 		}
 		players1[session_id] = playerData;		
 	}
@@ -65,16 +66,20 @@ server.post("/getIn", (req, res) => {
 		players1[session_id].car+", "+
 		players1[session_id].left+", "+
 		players1[session_id].top+", "+
-		players1[session_id].direction+")");
+		players1[session_id].direction+", "+
+		players1[session_id].status+")");
 	res.send();
 });
 
-server.get("/end", (req, res) => {
-	// clear the cookie
-	res.clearCookie("username");
-	res.clearCookie("session_id");
-	delete players1.username;
-  });
+server.post("/endSession", (req, res) => {
+	let session_id = req.cookies.session_id;
+	if (!(session_id === undefined || players1[session_id] === undefined)) {
+		players1[session_id].status = 'dead';
+		sendPlayerDataToEveryone(serverSocket, session_id)
+		delete players1[session_id];
+	}
+	res.send();
+});
 
 serverSocket.on('connection', function (socket) {
 	console.log("Connection built");
@@ -99,9 +104,9 @@ serverSocket.on('connection', function (socket) {
 			sendPlayerDataToEveryone(serverSocket, action.id);
 		};		
     };
+    // Mark player sleeping
     socket.onclose = function (event) {
-		// The ws communication has been cancelled here.
-		// We could mark the player grey to show that he isn't available
+		//TODO
 	};
 });
 

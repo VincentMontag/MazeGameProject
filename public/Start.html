@@ -3,10 +3,7 @@
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-      @media(prefers-color-scheme: dark){
-        html {filter:invert(100%);}
-        img{filter: invert(100%);}
-      }
+      
         * {box-sizing: border-box}
         body {
         background-color: lightyellow;
@@ -208,9 +205,9 @@
                     <br>
                 </div>
                 <button class="button highscore" href="" type="Button">Highscore</button>
-                <button class="submit" type="Button" onClick="start()">Start</button>
+                <button class="submit" type="Button" onClick="start()">Spiel fortsetzen</button>
                 <a href="javascript:openRules('../private/Regeln.html')"><button class="button regeln">Regeln</button></a>
-                <button class="end" type="Button" href="/end">Sitzung beenden</button>
+                <button class="end" type="Button" onClick="restart()">Neues Spiel</button>
             </div>
             
         </div>
@@ -260,7 +257,16 @@
             	
             	request.onload = function () {
             		location.href = "../private/Canvas.html";
-            	};
+            	};            	
+            }
+            
+            function restart() {
+            	var request = new XMLHttpRequest();
+            	request.open("POST", "/endSession", true);
+            	request.send();
+            	request.onload = function () {
+            		start();
+            	};  
             }
             
         </script>
