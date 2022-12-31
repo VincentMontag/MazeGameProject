@@ -31,14 +31,36 @@
     		background:lightyellow;
 		overflow:hidden;
 		}
-		
+
+		button {
+			position: relative;
+			font-weight: bold;
+			float: right;			
+		}
+
+		.space::before {  
+            content: "";
+            background-image: url('../pixelart/space.png');
+            background-size: cover;
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            bottom: 0px;
+            left: 0px;
+            opacity: 0.7;
+        }		
     </style>
     	
 </head>
 <body>	
-	<div id="game">
-    	<canvas id = "MazeGame" width = "1520" height = "760"></canvas>
-	</div>	
+	<div class="space">
+		<a href="../public/Start.html"><button class="button zurueck">zurück</button></a>
+		<p></p>
+		<div id="game">
+    		<canvas id = "MazeGame" width = "1520" height = "760"></canvas>
+		</div>	
+		
+</div>
 </body>
 
 <script>
