@@ -69,6 +69,13 @@ server.post("/getIn", (req, res) => {
 	res.send();
 });
 
+server.get("/end", (req, res) => {
+	// clear the cookie
+	res.clearCookie("username");
+	res.clearCookie("session_id");
+	delete players1.username;
+  });
+
 serverSocket.on('connection', function (socket) {
 	console.log("Connection built");
 	
