@@ -59,7 +59,9 @@ server.post("/getIn", (req, res) => {
 			status: 'playing'
 		}
 		players1[session_id] = playerData;		
-	}
+	} else {
+		players1[session_id].status = 'playing';
+	}	
 	console.log("Player got in: ("+
 		session_id+", "+
 		players1[session_id].username+", "+
@@ -71,12 +73,25 @@ server.post("/getIn", (req, res) => {
 	res.send();
 });
 
+// Mark the player dead
 server.post("/endSession", (req, res) => {
 	let session_id = req.cookies.session_id;
 	if (!(session_id === undefined || players1[session_id] === undefined)) {
 		players1[session_id].status = 'dead';
-		sendPlayerDataToEveryone(serverSocket, session_id)
+		sendPlayerDataToEveryone(serverSocket, session_id);
 		delete players1[session_id];
+	}
+	res.send();
+});
+
+// Mark the player sleeping
+server.post("/markSleeping", (req, res) => {
+	console.log("sleep");
+	let session_id = req.cookies.session_id;
+	// In general the data should be available
+	if (!(session_id === undefined || players1[session_id] === undefined)) {
+		players1[session_id].status = 'sleeping';
+		sendPlayerDataToEveryone(serverSocket, session_id);
 	}
 	res.send();
 });
@@ -104,10 +119,6 @@ serverSocket.on('connection', function (socket) {
 			sendPlayerDataToEveryone(serverSocket, action.id);
 		};		
     };
-    // Mark player sleeping
-    socket.onclose = function (event) {
-		//TODO
-	};
 });
 
 // If a new player joined the game he has to draw all the active players

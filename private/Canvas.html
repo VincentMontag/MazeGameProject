@@ -29,7 +29,7 @@
     	
     	body {
     		background:lightyellow;
-		overflow:hidden;
+			overflow:hidden;
 		}
 
 		button {
@@ -80,31 +80,43 @@ function openWebSocket() {
 		let update = JSON.parse(event.data);		
 		let playerTag = document.querySelector(`#p${update.id}`);
 		
-		// Create new player on the screen
+		// Make the player visible for the first time by creating a new div
 		if (playerTag == null) {
-			let node = document.createElement("div");
-			node.setAttribute("class", "car");
-			node.setAttribute("id", `p${update.id}`);
-			node.setAttribute("style", `left: ${update.player.left}px; 
-										top: ${update.player.top}px; 
+			playerTag = document.createElement("div");
+			playerTag.setAttribute("class", "car");
+			playerTag.setAttribute("id", `p${update.id}`);
+			//TODO: add name
+			document.querySelector("#game").appendChild(playerTag);
+		}	
+		// Update player div tag
+		
+		// The received player left the game completely, so we remove him
+		if (update.player.status == "dead") 
+			playerTag.remove();
+		// The received player moved, so we update his data
+		else if (update.player.status == "playing")
+			playerTag.setAttribute("style", `left: ${update.player.left}px; 
+										top: ${update.player.top}px;
 										background-image: url(${update.player.car});
-										transform: rotate(${update.player.direction}deg);`);
-			document.querySelector("#game").appendChild(node);
-			
-		// Update player	
-		} else {
-			if (update.player.status == "dead") 
-				playerTag.remove();
-			else
-				playerTag.setAttribute("style", `left: ${update.player.left}px; 
+										transform: rotate(${update.player.direction}deg);
+										opacity: 1;`);
+		// The received player left the game, but his data is still available -> make him transparent
+		else 
+			playerTag.setAttribute("style", `left: ${update.player.left}px; 
 											top: ${update.player.top}px;
 											background-image: url(${update.player.car});
-											transform: rotate(${update.player.direction}deg);`);
-		}
+											transform: rotate(${update.player.direction}deg);
+											opacity: 0.4;`);
+			
+		
 		
 	};
+	// If the player leaves the Canvas.html, the socket will be closed.
+	// This onclose event provides the server with the player id who left the game 
 	socket.onclose = () => {
-		console.log("socket closed in client");
+		var request = new XMLHttpRequest();
+    	request.open("POST", "/markSleeping", true);
+    	request.send();
 	}
 }
 	
@@ -145,11 +157,16 @@ openWebSocket();
 function setCanvasSize() {
 	document.querySelector('#MazeGame').setAttribute("width", window.innerWidth - 80);
 	document.querySelector('#MazeGame').setAttribute("height", window.innerHeight - 80);
-}
+};
 window.onresize = function(event) {
 	setCanvasSize();
 };
 setCanvasSize();
+
+// On leaving the page
+window.onbeforeunload = function() {
+	socket.close();
+};
 
 </script>
 
