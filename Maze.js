@@ -14,17 +14,16 @@ class Player {
 	}
 	
 	// Performes the movement through the whole maze
-	// hintedMaze = true if the movement should be performed in the hinted maze
 	// time = x, where x is the delay in each single move
-	autoMove(time, hintedMaze) {
+	autoMove(time) {
 		//TODO Timer instead of while(true)
 		while (true) {
-			if (isAllowed(this.x, this.y, this.dir.left(), hintedMaze)) {
+			if (isAllowed(this.x, this.y, this.dir.left())) {
 				move(this.dir.left(), hintedMaze); 
 				this.dir = this.dir.left();
-			} else if (isAllowed(this.x, this.y, this.dir, hintedMaze)) 
+			} else if (isAllowed(this.x, this.y, this.dir)) 
 				move(this.dir, hintedMaze);
-			else if (isAllowed(this.x, this.y, this.dir.left().left(), hintedMaze)) 
+			else if (isAllowed(this.x, this.y, this.dir.left().left())) 
 				this.dir = this.dir.left().left();
 			else 
 				this.dir = this.dir.left().left().left();
@@ -36,9 +35,8 @@ class Player {
 	
 	// Moves the player if it is allowed.
 	// dir is a matching string
-	// hintedMaze = true, if the move should be performed in the hintedMaze
-	move(direction, hintedMaze) {
-		if (isAllowed(this.x, this.y, direction, hintedMaze)) {
+	move(direction) {
+		if (isAllowed(this.x, this.y, direction)) {
 			this.dir = direction;
 			if (direction.equal(Direction.UP)) this.y--;
 			else if (direction.equal(Direction.LEFT)) this.x--;
@@ -69,15 +67,11 @@ function getY(id) {
 
 module.exports = { addPlayer, movePlayer, getX, getY };
 
-/*
-// Box width 1520
-const bw = 1320;
+// Box width 1500
+const bw = 1500;
 
-// Box height 760
-const bh = 660;
-
-// Padding
-const p = 0;
+// Box height 750
+const bh = 750;
 
 // Context
 const mazegame = null;//document.getElementById("MazeGame");
@@ -94,15 +88,12 @@ let width = bw / mode - 1;
 let height = bh / mode - 1;
 
 // Maze
-let hintedMaze = [];
 let maze = [];
-
-let hintPhase = false;
 
 function generateMaze() {
 	let solvable = false;
 	for (i = 0; i < bh / mode; i++)
-		hintedMaze[i] = [];
+		maze[i] = [];
 	do {
 		fillRandomly();	
 		buildFrame();
@@ -215,7 +206,7 @@ function hasWall(x, y, d, hinted) {
 Draws the maze once.
 When drawing again, the screen has to be cleaned.
 */
-/*
+
 function drawMaze(){
 	
 	    
@@ -270,4 +261,4 @@ function drawMaze(){
 		mazegame2d.stroke();
 		
 		    
-}*/
+}

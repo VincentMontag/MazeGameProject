@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <title>Maze Game</title>
 
-<script src="Maze.js"></script>
-
     <style>
     	/*TODO*/
     	div{
@@ -15,8 +13,9 @@
     	.car {
     		z-index: 1;
     		position: absolute;
-    		width: 64px;
-    		height: 64px;
+    		width: 50px;
+    		height: 50px;
+    		background-size: cover;
     	}
     	
     	canvas{
@@ -57,7 +56,7 @@
 		<a href="../public/Start.html"><button class="button zurueck">zurück</button></a>
 		<p></p>
 		<div id="game">
-    		<canvas id = "MazeGame" width = "1520" height = "760"></canvas>
+    		<canvas id = "MazeGame" width = "1500" height = "750"></canvas>
 		</div>	
 		
 </div>
@@ -157,15 +156,90 @@ function showName(name) {
 
 openWebSocket();
 
+//================================================CANVAS METHODS=========================================
+// Implementation: Presumably, a second websocket connection is necessary reporting
+// the width, height and the the composition of the maze to the clients.
+
+// field width
+let fieldWidth = 50;
+// number of horizontal fields
+let mazeWidth = 40;
+//number of vertical fields
+let mazeHeight = 20;
+// canvas width
+let cWidth = fieldWidth * mazeWidth;
+// canvas height
+let cHeight = fieldWidth * mazeHeight;
+// canvas to draw on
+const mazegame2d = document.getElementById("MazeGame").getContext("2d");
+
 // Set canvas size
 function setCanvasSize() {
-	document.querySelector('#MazeGame').setAttribute("width", window.innerWidth - 80);
-	document.querySelector('#MazeGame').setAttribute("height", window.innerHeight - 80);
+	// TODO size depends on mode in Maze.js
 };
-window.onresize = function(event) {
-	setCanvasSize();
-};
-setCanvasSize();
+
+// drawMaze(maze) is triggered by the websocket connection
+// test maze and draw:
+let maze = [];
+for (i = 0; i < mazeHeight; i++) {
+	maze[i] = [];
+	for (k = 0; k < mazeWidth; k++) {
+		maze[i][k] = 1 << Math.floor(Math.random() * 4);
+	}
+}
+
+function drawMazeBlockWalls(maze) {    
+    // drawing code here:	
+    // Choose color to draw with
+    // rgba (red, green, blue, alpha [= transparency])
+    // mazegame2d.fillStyle = "rgb(0, 0, 0)";
+    // fillRect(x, y, width, height) draws filled rectangle
+ 	// strokeRect(x, y, width, height) draws rectangular outline
+ 	// clearRect(x, y, width, height) clears specified arie and makes it transparent
+   	//-------------------------------------------------
+    // path = draw points, connect them and fill them to any shape yoou want
+    // moveTo(x,y) = initial point
+    // lineTo(x,y) = draw line to somewhere
+    // fill() = fills everything inside the lines
+    //-------------------------------------------------
+    // new Path2D(); empty path obj
+    // new Path2D(path); copy from another Path2D obj
+    // Path2d(d); path from SVG path data
+    //-------------------------------------------------
+    // Grid:
+	mazegame2d.fillStyle = "rgb(0, 0, 0)";
+	for (y = 0; y < mazeHeight; y++) {
+		for (x = 0; x < mazeWidth; x++) {
+			if ((maze[y][x] & 0b1) == 1) // right vertical line
+				mazegame2d.fillRect(
+					fieldWidth * (x + 3.0 / 4), 
+					fieldWidth * (y - 1.0 / 4), 
+					fieldWidth * 0.5, 
+					fieldWidth * 1.5);
+			else if (((maze[y][x] >> 1) & 0b1) == 1) // upper horizontal line
+				mazegame2d.fillRect(
+					fieldWidth * (x - 1.0 / 4),
+					fieldWidth * (y - 1.0 / 4),
+					fieldWidth * 1.5,
+					fieldWidth * 0.5);
+			else if (((maze[y][x] >> 2) & 0b1) == 1) // left vertical line
+				mazegame2d.fillRect(
+					fieldWidth * (x - 1.0 / 4),
+					fieldWidth * (y - 1.0 / 4),
+					fieldWidth * 0.5,
+					fieldWidth * 1.5);
+			else if (((maze[y][x] >> 3) & 0b1) == 1) // lower horizontal line
+				mazegame2d.fillRect(
+					fieldWidth * (x - 1.0 / 4),
+					fieldWidth * (y + 3.0 / 4),
+					fieldWidth * 1.5,
+					fieldWidth * 0.5);
+		}
+	}
+	mazegame2d.stroke();	    
+}
+
+drawMazeBlockWalls(maze);
 
 // On leaving the page
 window.onbeforeunload = function() {
