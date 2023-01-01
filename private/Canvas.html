@@ -78,14 +78,14 @@ function openWebSocket() {
 	};
 	socket.onmessage = (event) => {
 		let update = JSON.parse(event.data);		
-		let playerTag = document.querySelector(`#p${update.id}`);
+		let playerTag = document.querySelector(`#p${update.player.username}`);
 		
 		// Make the player visible for the first time by creating a new div
 		if (playerTag == null) {
 			playerTag = document.createElement("div");
 			playerTag.setAttribute("class", "car");
-			playerTag.setAttribute("id", `p${update.id}`);
-			//TODO: add name
+			playerTag.setAttribute("id", `p${update.player.username}`);
+			playerTag.setAttribute("onclick", `showName("${update.player.username}")`);
 			document.querySelector("#game").appendChild(playerTag);
 		}	
 		// Update player div tag
@@ -149,6 +149,10 @@ function move(direction) {
 		dir: direction
 	};
 	socket.send(JSON.stringify(action));
+}
+
+function showName(name) {
+	// TODO show name
 }
 
 openWebSocket();

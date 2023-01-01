@@ -256,7 +256,11 @@
             	request.send(JSON.stringify(player)); 
             	
             	request.onload = function () {
-            		location.href = "../private/Canvas.html";
+            		if (request.responseText == "ALREADY_USED") {
+            			// TODO show that the name is used already
+            		} else {
+            			location.href = "../private/Canvas.html";
+            		}            		
             	};            	
             }
             

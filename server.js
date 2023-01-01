@@ -45,6 +45,10 @@ server.get("/", (req, res) => {
 });
 
 server.post("/getIn", (req, res) => {
+	if (usernameAlreadyUsed(req.body.name)) {
+		res.send("ALREADY_USED");
+		return;
+	}
 	let session_id = req.cookies.session_id;
 	if (session_id === undefined || players1[session_id] === undefined) {
 		session_id = JSON.stringify(Math.random());
@@ -164,4 +168,10 @@ function getAngle(direction) {
 	else if (direction == "LEFT") angle = 90;
 	else if (direction == "UP") angle = 180;
 	return angle;
+}
+
+function usernameAlreadyUsed(name) {
+	for (ids in players1)
+		if (players1[ids].username == name) return true;
+	return false;
 }
