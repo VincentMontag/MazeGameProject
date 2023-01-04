@@ -113,14 +113,14 @@ function openWebSocket() {
 		else if (update.player.status == "playing")
 			playerTag.setAttribute("style", `left: ${update.player.left * fieldWidth}px; 
 										top: ${update.player.top * fieldWidth}px;
-										background-image: url(${update.player.car});
+										background-image: url(${update.player.rocket});
 										transform: rotate(${update.player.direction}deg);
 										opacity: 1;`);
 		// The received player left the game, but his data is still available -> make him transparent
 		else 
 			playerTag.setAttribute("style", `left: ${update.player.left}px; 
 											top: ${update.player.top}px;
-											background-image: url(${update.player.car});
+											background-image: url(${update.player.rocket});
 											transform: rotate(${update.player.direction}deg);
 											opacity: 0.4;`);
 			
