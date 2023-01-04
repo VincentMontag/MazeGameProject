@@ -69,11 +69,11 @@ let socket = null;
 let port = null;
 
 //field width
-let fieldWidth = 50;
+let fieldWidth = 40;
 // number of horizontal fields
-let mazeWidth = 40;
+let mazeWidth = 30;
 //number of vertical fields
-let mazeHeight = 20;
+let mazeHeight = 15;
 // canvas width
 let cWidth = fieldWidth * mazeWidth;
 // canvas height
@@ -213,8 +213,8 @@ function setCanvasSize() {
 };
 
 function drawMaze(maze) {
-	for (y = 0; y < mazeHeight; y++) {
-		for (x = 0; x < mazeWidth; x++) {
+	for (y = 0; y < mazeHeight+2; y++) {
+		for (x = 0; x < mazeWidth+2; x++) {
 			if ((maze[y][x] & 0b1) == 1)
 				drawLine(// right vertical line
 						fieldWidth * (x + 1), 
@@ -274,8 +274,8 @@ function drawMazeBlockWalls(maze) {
     //-------------------------------------------------
     // Grid:
 	mazegame2d.fillStyle = "rgb(0, 0, 0)";
-	for (y = 0; y < mazeHeight; y++) {
-		for (x = 0; x < mazeWidth; x++) {
+	for (y = 0; y < mazeHeight+2; y++) {
+		for (x = 0; x < mazeWidth+2; x++) {
 			if ((maze[y][x] & 0b1) == 1) // right vertical line
 				mazegame2d.fillRect(
 					fieldWidth * (x + 3.0 / 4), 

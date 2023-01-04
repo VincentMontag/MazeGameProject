@@ -5,7 +5,7 @@
 // Maze.js
 const maze = require("./Maze.js"); 
 
-const mazeFields = maze.generateMaze(50, 40);
+const mazeFields = maze.generateMaze(30, 15);
 
 var Direction = require('./Direction.js');
  
