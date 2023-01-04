@@ -26,7 +26,7 @@ class Direction{
 		return this.num == direction.num;
 	}
 	
- 	left(){
+ 	left() {
  		if(this.num == 0){
  			return Direction.UP;
  		} else if(this.num == 1){

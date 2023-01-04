@@ -3,6 +3,10 @@ const Direction = require('./Direction.js');
 
 players = {}
 
+let maze = [];
+let w = 0;
+let h = 0;
+
 class Player {
 	
 	constructor(x, y) {
@@ -20,26 +24,31 @@ class Player {
 			else if (direction.equal(Direction.LEFT)) this.x--;
 			else if (direction.equal(Direction.RIGHT)) this.x++;
 			else if (direction.equal(Direction.DOWN)) this.y++;
-			//if (this.x == Main.WIDTH + 1) console.log("Player reached target");
+			if (this.x == w + 1) {
+				console.log("Player reached target");
+				//TODO
+			}
 			return true;
 		}
 		return false;
 	}
 	
 	// Performes the movement through the whole maze
-	autoMove(width) {
+	autoMove() {
+		let current = Direction.RIGHT;
 		while (true) {
-			if (isAllowed(this.x, this.y, this.dir.left())) {
-				move(this.dir.left()); 
-				this.dir = this.dir.left();
-			} else if (isAllowed(this.x, this.y, this.dir)) 
-				this.move(this.dir);
-			else if (isAllowed(this.x, this.y, this.dir.left().left())) 
-				this.dir = this.dir.left().left();
-			else 
-				this.dir = this.dir.left().left().left();
+			if (isAllowed(this.x, this.y, current.left())) {
+				this.move(current.left()); 
+				current = current.left();
+			} else if (isAllowed(this.x, this.y, current)) {
+				this.move(current);
+			} else if (isAllowed(this.x, this.y, current.left().left())) {
+				current = current.left().left();
+			} else {
+				current = current.left().left().left();
+			}
 			if (this.x == 0 && this.y == 1) return false;
-			else if (x == width) return true;		
+			else if (this.x == w + 1) return true;		
 		}
 	}
 	
@@ -60,10 +69,6 @@ function getY(id) {
 	return players[id].y;
 }
 
-let maze = [];
-let w = 0;
-let h = 0;
-
 function generateMaze(width, height) {
 	w = width;
 	h = height;
@@ -76,7 +81,7 @@ function generateMaze(width, height) {
 		buildEntry();
 		buildExit(width, height);
 		tester = new Player(0, 1, null);
-		solvable = tester.autoMove(width+1);
+		solvable = tester.autoMove();
 	} while (!solvable);
 	return maze;
 }
@@ -152,6 +157,6 @@ Checks if there is a wall at (x, y) in direction d.
 hinted = true if the check should be proceeded on the hinted maze
 */	
 function hasWall(x, y, d) {
-	if (x < 0 || y < 0 || x > w || y > h) return true;
+	if (x < 0 || y < 0 || x > w + 1 || y > h + 1) return true;
 	return ((maze[y][x] >> d.num) & 0b1) == 1; 
 }
