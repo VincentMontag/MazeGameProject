@@ -11,7 +11,7 @@
     		position: relative;
     	}
     */
-    	div.car {
+    	div.rocket {
     		z-index: 1;
     		width: 50px;
     		height: 50px;
@@ -98,7 +98,7 @@ function openWebSocket() {
 		if (playerTag == null) {
 			playerTag = document.createElement("div");
 			//playerTag.setAttribute("position", "absolute");
-			playerTag.setAttribute("class", "car");
+			playerTag.setAttribute("class", "rocket");
 			playerTag.setAttribute("id", `p${update.player.username}`);
 			playerTag.setAttribute("onclick", `showName("${update.player.username}")`);
 			
