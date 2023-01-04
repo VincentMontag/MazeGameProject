@@ -62,7 +62,7 @@ server.post("/getIn", (req, res) => {
 		maze.addPlayer(session_id);
 		let playerData = {
 			username: req.body.name,
-			car: getImagePath(req.body.car),
+			rocket: getImagePath(req.body.rocket),
 			left: maze.getX(session_id),
 			top: maze.getY(session_id),
 			direction: 270,
@@ -75,7 +75,7 @@ server.post("/getIn", (req, res) => {
 	console.log("Player got in: ("+
 		session_id+", "+
 		players1[session_id].username+", "+
-		players1[session_id].car+", "+
+		players1[session_id].rocket+", "+
 		players1[session_id].left+", "+
 		players1[session_id].top+", "+
 		players1[session_id].direction+", "+
@@ -159,7 +159,7 @@ function getImagePath(i) {
 	else if (i == 2) path = '../pixelart/player_brown.png';
 	else if (i == 3) path = '../pixelart/player_green.png';
 	else if (i == 4) path = '../pixelart/player_grey.png';
-	else if (i == 5) path = '../pixelart/player_orange.png';
+	else if (i == 5) path = '../pixelart/player_patrol.png';
 	else if (i == 6) path = '../pixelart/player_pink.png';
 	else if (i == 7) path = '../pixelart/player_purble.png';
 	else if (i == 8) path = '../pixelart/player_red.png';
