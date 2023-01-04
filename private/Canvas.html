@@ -31,7 +31,6 @@
     	
     	body {
     		background:lightyellow;
-			overflow:hidden;
 		}
 
 		button {
@@ -143,6 +142,24 @@ function openWebSocket() {
     	request.send();
 	}
 }
+
+//disables arrowkeys for scrolling
+var keys = {};
+window.addEventListener("keydown",
+    function(e){
+        keys[e.code] = true;
+        switch(e.code){
+            case "ArrowUp": case "ArrowDown": case "ArrowLeft": case "ArrowRight":
+            case "Space": e.preventDefault(); break;
+            default: break; // do not block other keys
+        }
+    },
+false);
+window.addEventListener('keyup',
+    function(e){
+        keys[e.code] = false;
+    },
+false);		
 	
 document.onkeydown = checkKey;
 function checkKey(e){
