@@ -126,8 +126,8 @@ function openWebSocket() {
 										opacity: 1;`);
 		// The received player left the game, but his data is still available -> make him transparent
 		else 
-			playerTag.setAttribute("style", `left: ${update.player.left}px; 
-											top: ${update.player.top}px;
+			playerTag.setAttribute("style", `left: ${update.player.left * fieldWidth}px; 
+											top: ${update.player.top * fieldWidth}px;
 											background-image: url(${update.player.rocket});
 											transform: rotate(${update.player.direction}deg);
 											opacity: 0.4;`);
@@ -176,11 +176,7 @@ function move(direction) {
 }
 
 function showName(name) {
-	// TODO show name
 	document.getElementById('username').style.visibility='visible';
-	
-	//const result= document.getElementById("result")
-	//result.innerHTML=name;
 }
 function hideName(name){
 	document.getElementById('username').style.visibility='hidden';

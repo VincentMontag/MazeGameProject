@@ -65,7 +65,7 @@ server.post("/getIn", (req, res) => {
 			rocket: getImagePath(req.body.rocket),
 			left: maze.getX(session_id),
 			top: maze.getY(session_id),
-			direction: 270,
+			direction: 90,
 			status: 'playing'
 		}
 		players1[session_id] = playerData;		
@@ -170,9 +170,9 @@ function getImagePath(i) {
 
 function getAngle(direction) {
 	let angle = 0;
-	if (direction == "RIGHT") angle = 270;
-	else if (direction == "LEFT") angle = 90;
-	else if (direction == "UP") angle = 180;
+	if (direction == "RIGHT") angle = 90;
+	else if (direction == "LEFT") angle = 270;
+	else if (direction == "DOWN") angle = 180;
 	return angle;
 }
 
