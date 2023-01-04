@@ -6,17 +6,18 @@
 
     <style>
     	/*TODO*/
-    	div{
-    		margin: 1%;
+    /*
+    	#game {
+    		position: relative;
     	}
-    	
-    	.car {
+    */
+    	div.car {
     		z-index: 1;
-    		position: absolute;
     		width: 50px;
     		height: 50px;
+    		position: absolute;
     		background-size: cover;
-    	}
+    	}    	
     	
     	canvas{
     		border: 2px solid black;
@@ -24,6 +25,8 @@
     		display:block;	
     		float: left;
  			z-index: 0;
+ 			left: 0px;
+ 			top: 0px;
     	}
     	
     	body {
@@ -54,7 +57,6 @@
 <body>	
 	<div class="space">
 		<a href="../public/Start.html"><button class="button zurueck">zurück</button></a>
-		<p></p>
 		<div id="game">
     		<canvas id = "MazeGame" width = "1500" height = "750"></canvas>
 		</div>	
@@ -66,6 +68,19 @@
 
 let socket = null;
 let port = null;
+
+//field width
+let fieldWidth = 50;
+// number of horizontal fields
+let mazeWidth = 40;
+//number of vertical fields
+let mazeHeight = 20;
+// canvas width
+let cWidth = fieldWidth * mazeWidth;
+// canvas height
+let cHeight = fieldWidth * mazeHeight;
+// canvas to draw on
+const mazegame2d = document.getElementById("MazeGame").getContext("2d");
 
 function openWebSocket() {
 	console.log("Open websocket");
@@ -82,9 +97,11 @@ function openWebSocket() {
 		// Make the player visible for the first time by creating a new div
 		if (playerTag == null) {
 			playerTag = document.createElement("div");
+			//playerTag.setAttribute("position", "absolute");
 			playerTag.setAttribute("class", "car");
 			playerTag.setAttribute("id", `p${update.player.username}`);
 			playerTag.setAttribute("onclick", `showName("${update.player.username}")`);
+			
 			document.querySelector("#game").appendChild(playerTag);
 		}	
 		// Update player div tag
@@ -94,8 +111,8 @@ function openWebSocket() {
 			playerTag.remove();
 		// The received player moved, so we update his data
 		else if (update.player.status == "playing")
-			playerTag.setAttribute("style", `left: ${update.player.left}px; 
-										top: ${update.player.top}px;
+			playerTag.setAttribute("style", `left: ${update.player.left * fieldWidth}px; 
+										top: ${update.player.top * fieldWidth}px;
 										background-image: url(${update.player.car});
 										transform: rotate(${update.player.direction}deg);
 										opacity: 1;`);
@@ -160,35 +177,56 @@ openWebSocket();
 // Implementation: Presumably, a second websocket connection is necessary reporting
 // the width, height and the the composition of the maze to the clients.
 
-// field width
-let fieldWidth = 50;
-// number of horizontal fields
-let mazeWidth = 40;
-//number of vertical fields
-let mazeHeight = 20;
-// canvas width
-let cWidth = fieldWidth * mazeWidth;
-// canvas height
-let cHeight = fieldWidth * mazeHeight;
-// canvas to draw on
-const mazegame2d = document.getElementById("MazeGame").getContext("2d");
+
 
 // Set canvas size
 function setCanvasSize() {
 	// TODO size depends on mode in Maze.js
 };
 
-// drawMaze(maze) is triggered by the websocket connection
-// test maze and draw:
-let maze = [];
-for (i = 0; i < mazeHeight; i++) {
-	maze[i] = [];
-	for (k = 0; k < mazeWidth; k++) {
-		maze[i][k] = 1 << Math.floor(Math.random() * 4);
+function drawMaze(maze) {
+	for (y = 0; y < mazeHeight; y++) {
+		for (x = 0; x < mazeWidth; x++) {
+			if ((maze[y][x] & 0b1) == 1)
+				drawLine(// right vertical line
+						fieldWidth * (x + 1), 
+						fieldWidth * y, 
+						fieldWidth * (x + 1), 
+						fieldWidth * (y + 1),
+						mazegame2d); 
+			else if (((maze[y][x] >> 1) & 0b1) == 1)
+				drawLine(// upper horizontal line
+						fieldWidth * x,
+						fieldWidth * y,
+						fieldWidth * (x + 1),
+						fieldWidth * y,
+						mazegame2d);
+			else if (((maze[y][x] >> 2) & 0b1) == 1)
+				drawLine(// left vertical line
+						fieldWidth * x,
+						fieldWidth * y,
+						fieldWidth * x,
+						fieldWidth * (y + 1),
+						mazegame2d);
+			else if (((maze[y][x] >> 3) & 0b1) == 1)
+				drawLine(// lower horizontal line
+						fieldWidth * x,
+						fieldWidth * (y + 1),
+						fieldWidth * (x + 1),
+						fieldWidth * (y + 1),
+						mazegame2d);
+		}
 	}
+	mazegame2d.stroke();
+}
+	
+function drawLine(x1, y1, x2, y2, g) {
+	g.moveTo(x1, y1);
+	g.lineTo(x2, y2);
 }
 
-function drawMazeBlockWalls(maze) {    
+function drawMazeBlockWalls(maze) {  
+	mazegame2d.fillRect(0, 0, 50, 50);
     // drawing code here:	
     // Choose color to draw with
     // rgba (red, green, blue, alpha [= transparency])
@@ -239,7 +277,17 @@ function drawMazeBlockWalls(maze) {
 	mazegame2d.stroke();	    
 }
 
-drawMazeBlockWalls(maze);
+function requireMaze() {
+	var request = new XMLHttpRequest();
+	request.open("GET", "/getMaze", true);
+	request.send();
+	request.onload = function () {
+		maze = JSON.parse(request.responseText);
+		drawMaze(maze);
+	}
+}
+
+requireMaze();
 
 // On leaving the page
 window.onbeforeunload = function() {

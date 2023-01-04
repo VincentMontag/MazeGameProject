@@ -5,6 +5,8 @@
 // Maze.js
 const maze = require("./Maze.js"); 
 
+const mazeFields = maze.generateMaze(50, 40);
+
 var Direction = require('./Direction.js');
  
 // express server
@@ -42,6 +44,10 @@ players1 = {}
 server.get("/", (req, res) => {
     data = fs.readFileSync("public/Start.html", { encoding: 'utf8', flag: 'r' });
     res.send(data);
+});
+
+server.get("/getMaze", (req, res) => {
+	res.send(JSON.stringify(mazeFields));
 });
 
 server.post("/getIn", (req, res) => {

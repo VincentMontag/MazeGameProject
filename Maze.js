@@ -1,8 +1,6 @@
 
 const Direction = require('./Direction.js');
 
-const SCALE = 10;
-
 players = {}
 
 class Player {
@@ -11,26 +9,6 @@ class Player {
 		this.x = x;
 		this.y = y;
 		this.dir = Direction.RIGHT;
-	}
-	
-	// Performes the movement through the whole maze
-	// time = x, where x is the delay in each single move
-	autoMove(time) {
-		//TODO Timer instead of while(true)
-		while (true) {
-			if (isAllowed(this.x, this.y, this.dir.left())) {
-				move(this.dir.left(), hintedMaze); 
-				this.dir = this.dir.left();
-			} else if (isAllowed(this.x, this.y, this.dir)) 
-				move(this.dir, hintedMaze);
-			else if (isAllowed(this.x, this.y, this.dir.left().left())) 
-				this.dir = this.dir.left().left();
-			else 
-				this.dir = this.dir.left().left().left();
-			//if (time > 0) Thread.sleep(time);
-			if (this.x == 0 && this.y == 1) return false;
-			//else if (x == Main.WIDTH + 1) return true;		
-		}
 	}
 	
 	// Moves the player if it is allowed.
@@ -48,6 +26,23 @@ class Player {
 		return false;
 	}
 	
+	// Performes the movement through the whole maze
+	autoMove(width) {
+		while (true) {
+			if (isAllowed(this.x, this.y, this.dir.left())) {
+				move(this.dir.left()); 
+				this.dir = this.dir.left();
+			} else if (isAllowed(this.x, this.y, this.dir)) 
+				this.move(this.dir);
+			else if (isAllowed(this.x, this.y, this.dir.left().left())) 
+				this.dir = this.dir.left().left();
+			else 
+				this.dir = this.dir.left().left().left();
+			if (this.x == 0 && this.y == 1) return false;
+			else if (x == width) return true;		
+		}
+	}
+	
 }
 function addPlayer(id) {
 	players[id] = new Player(0, 1);
@@ -58,114 +53,74 @@ function movePlayer(id, direction) {
 }
 
 function getX(id) {
-	return players[id].x * SCALE;
+	return players[id].x;
 }
 
 function getY(id) {
-	return players[id].y * SCALE;
+	return players[id].y;
 }
 
-module.exports = { addPlayer, movePlayer, getX, getY };
-
-// Box width 1500
-const bw = 1500;
-
-// Box height 750
-const bh = 750;
-
-// Context
-const mazegame = null;//document.getElementById("MazeGame");
-const mazegame2d = null;//mazegame.getContext("2d");
-		
-// Modes
-const hardMode = 20;
-const mediumMode = 40;
-const easyMode = 76;
-
-let mode = hardMode;
-
-let width = bw / mode - 1;
-let height = bh / mode - 1;
-
-// Maze
 let maze = [];
+let w = 0;
+let h = 0;
 
-function generateMaze() {
+function generateMaze(width, height) {
+	w = width;
+	h = height;
 	let solvable = false;
-	for (i = 0; i < bh / mode; i++)
+	for (i = 0; i < height + 2; i++)
 		maze[i] = [];
 	do {
-		fillRandomly();	
-		buildFrame();
+		fillRandomly(width, height);	
+		buildFrame(width, height);
 		buildEntry();
-		buildExit();
+		buildExit(width, height);
 		tester = new Player(0, 1, null);
-		solvable = tester.autoMove(0);
+		solvable = tester.autoMove(width+1);
 	} while (!solvable);
-	activateNewMaze(5);
+	return maze;
 }
 
-function activateNewMaze(counter) {
-	counter = counter - 1;
-	if (counter != 0) {
-		setTimeout(activateNewMaze, 500, counter);
-		hintPhase = !hintPhase;
-	} else {
-		hintPhase = false;
-		hintedToNewMaze();
-	} 
-	drawMaze();
-}
-
-
+module.exports = { addPlayer, movePlayer, getX, getY, generateMaze };
 
 //===============================================================================
 // Methods for creating the maze
 //===============================================================================
 
-function hintedToNewMaze() {
-	for (y = 0; y < bh / mode; y++) {
-		maze[y] = [];
-		for (x = 0; x < bw / mode; x++) {
-			maze[y][x] = hintedMaze[y][x];
-		}
-	}
-}
-
-function fillRandomly() {
+function fillRandomly(width, height) {
 	for (i = 1; i <= height; i++) {
 		for (k = 1; k <= width; k++) {
-			hintedMaze[i][k] = 1 << Math.floor(Math.random() * 4);
+			maze[i][k] = (1 << Math.floor(Math.random() * 4));
 		}
 	}
 }
 
-function buildFrame() {		
+function buildFrame(width, height) {		
 	for (y = 1; y <= height; y++) { // Right line
-		hintedMaze[y][width + 1] = 0b100;
+		maze[y][width + 1] = 0b100;
 	}
 	for (x = 1; x <= width; x++) { // Upper line
-		hintedMaze[0][x] = 0b1000;
+		maze[0][x] = 0b1000;
 	}
 	for (y = 1; y <= height; y++) { // Left line
-		hintedMaze[y][0] = 0b1;
+		maze[y][0] = 0b1;
 	}
 	for (x = 1; x <= width; x++) { // Lower line
-		hintedMaze[height + 1][x] = 0b10;
+		maze[height + 1][x] = 0b10;
 	}
 }
 	
 function buildEntry() {
-	hintedMaze[0][0] = 0b1000;
-	hintedMaze[1][0] = 0b1000;
+	maze[0][0] = 0b1000;
+	maze[1][0] = 0b1000;
 	possible = [0b1000, 0b0010, 0b0001];
-	hintedMaze[1][1] = possible[Math.floor(3 * Math.random())];
+	maze[1][1] = possible[Math.floor(3 * Math.random())];
 }
 	
-function buildExit() {
-	hintedMaze[height][width + 1] = 0b10;
-	hintedMaze[height + 1][width + 1] = 0b10;
-	hintedMaze[height][width] = 2 << Math.floor(Math.random() * 3);
+function buildExit(width, height) {
+	maze[height][width + 1] = 0b10;
+	maze[height + 1][width + 1] = 0b10;
+	maze[height][width] = 2 << Math.floor(Math.random() * 3);
 }
 
 //===============================================================================
@@ -176,18 +131,18 @@ function buildExit() {
 Proves if you can move into the given direction startet at x, y.
 hintedMaze = true if this step should be performed on the hinted maze
 */
-function isAllowed(x, y, direction, hintedMaze) {
+function isAllowed(x, y, direction) {
 	if (direction.equal(Direction.RIGHT) &&
-		(hasWall(x, y, Direction.RIGHT, hintedMaze) || hasWall(x + 1, y, Direction.LEFT, hintedMaze))) 
+		(hasWall(x, y, Direction.RIGHT) || hasWall(x + 1, y, Direction.LEFT))) 
 			return false;
 	if (direction.equal(Direction.UP) && 
-		(hasWall(x, y, Direction.UP, hintedMaze) || hasWall(x, y - 1, Direction.DOWN, hintedMaze)))
+		(hasWall(x, y, Direction.UP) || hasWall(x, y - 1, Direction.DOWN)))
 			return false;
 	if (direction.equal(Direction.LEFT) &&
-		(hasWall(x, y, Direction.LEFT, hintedMaze) || hasWall(x - 1, y, Direction.RIGHT, hintedMaze)))
+		(hasWall(x, y, Direction.LEFT) || hasWall(x - 1, y, Direction.RIGHT)))
 			return false;
 	if (direction.equal(Direction.DOWN) &&
-		(hasWall(x, y, Direction.DOWN, hintedMaze) || hasWall(x, y + 1, Direction.UP, hintedMaze)) )
+		(hasWall(x, y, Direction.DOWN) || hasWall(x, y + 1, Direction.UP)) )
 			return false;
 	return true;
 }
@@ -196,69 +151,7 @@ function isAllowed(x, y, direction, hintedMaze) {
 Checks if there is a wall at (x, y) in direction d. 
 hinted = true if the check should be proceeded on the hinted maze
 */	
-function hasWall(x, y, d, hinted) {
-	return false;
-	if (x < 0 || y < 0 || x > Main.WIDTH + 1 || y > Main.HEIGHT + 1) return true;
-	return (((hinted ? hintedMaze[y][x] : maze[y][x]) >> d.num) & 0b1) == 1; 
-}
-
-/*
-Draws the maze once.
-When drawing again, the screen has to be cleaned.
-*/
-
-function drawMaze(){
-	
-	    
-	    // drawing code here:	
-	    // Choose color to draw with
-	    // rgba (red, green, blue, alpha [= transparency])
-	    // mazegame2d.fillStyle = "rgb(0, 0, 0)";
-	    // fillRect(x, y, width, height) draws filled rectangle
-	 	// strokeRect(x, y, width, height) draws rectangular outline
-	 	// clearRect(x, y, width, height) clears specified arie and makes it transparent
-	   	//-------------------------------------------------
-	    // path = draw points, connect them and fill them to any shape yoou want
-	    // moveTo(x,y) = initial point
-	    // lineTo(x,y) = draw line to somewhere
-	    // fill() = fills everything inside the lines
-	    //-------------------------------------------------
-	    // new Path2D(); empty path obj
-	    // new Path2D(path); copy from another Path2D obj
-	    // Path2d(d); path from SVG path data
-	    //-------------------------------------------------
-	    // Grid:
-		mazegame2d.fillStyle = "rgb(0, 0, 0)";
-	
-		for (y = 0; y < bh / mode; y++) {
-			for (x = 0; x < bw / mode; x++) {
-				if ((maze[y][x] & 0b1) == 1) // right vertical line
-					mazegame2d.fillRect(
-						mode * (x + 3.0 / 4), 
-						mode * (y - 1.0 / 4), 
-						mode * 0.5, 
-						mode * 1.5);
-				else if (((maze[y][x] >> 1) & 0b1) == 1) // upper horizontal line
-					mazegame2d.fillRect(
-						mode * (x - 1.0 / 4),
-						mode * (y - 1.0 / 4),
-						mode * 1.5,
-						mode * 0.5);
-				else if (((maze[y][x] >> 2) & 0b1) == 1) // left vertical line
-					mazegame2d.fillRect(
-						mode * (x - 1.0 / 4),
-						mode * (y - 1.0 / 4),
-						mode * 0.5,
-						mode * 1.5);
-				else if (((maze[y][x] >> 3) & 0b1) == 1) // lower horizontal line
-					mazegame2d.fillRect(
-						mode * (x - 1.0 / 4),
-						mode * (y + 3.0 / 4),
-						mode * 1.5,
-						mode * 0.5);
-			}
-		}
-		mazegame2d.stroke();
-		
-		    
+function hasWall(x, y, d) {
+	if (x < 0 || y < 0 || x > w || y > h) return true;
+	return ((maze[y][x] >> d.num) & 0b1) == 1; 
 }
