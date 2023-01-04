@@ -106,7 +106,7 @@ function openWebSocket() {
 
 			var element = document.createElement("div");
 			element.setAttribute("id","username");
-			element.appendChild(document.createTextNode(`${update.player.username}`+'hola que tal'));
+			element.appendChild(document.createTextNode('user: '+`${update.player.username}`));
 			element.style.visibility='hidden';
 			element.style.fontWeight='bold';
 			element
