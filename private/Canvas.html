@@ -5,14 +5,8 @@
 <title>Maze Game</title>
 
     <style>
-    	/*TODO*/
-    /*
-    	#game {
-    		position: relative;
-    	}
-    */
     	div.rocket {
-    		z-index: 1;
+    		z-index: 2;
     		width: 50px;
     		height: 50px;
     		position: absolute;
@@ -24,13 +18,13 @@
     		margin: 0;
     		display:block;	
     		float: left;
- 			z-index: 0;
+ 			z-index: 1;
  			left: 0px;
  			top: 0px;
     	}
     	
     	body {
-    		background:lightyellow;
+    		background-image: url('../pixelart/space.png');
 		}
 
 		button {
@@ -38,18 +32,6 @@
 			font-weight: bold;
 			float: right;			
 		}
-
-		.space::before {  
-            content: "";
-            background-image: url('../pixelart/space.png');
-            background-size: cover;
-            position: absolute;
-            top: 0px;
-            right: 0px;
-            bottom: 0px;
-            left: 0px;
-            opacity: 0.7;
-        }		
     </style>
     	
 </head>
@@ -253,8 +235,7 @@ function drawLine(x1, y1, x2, y2, g) {
 	g.lineTo(x2, y2);
 }
 
-function drawMazeBlockWalls(maze) {  
-	mazegame2d.fillRect(0, 0, 50, 50);
+function drawMazeBlockWalls(maze) {
     // drawing code here:	
     // Choose color to draw with
     // rgba (red, green, blue, alpha [= transparency])
@@ -311,7 +292,7 @@ function requireMaze() {
 	request.send();
 	request.onload = function () {
 		maze = JSON.parse(request.responseText);
-		drawMaze(maze);
+		drawMazeBlockWalls(maze);
 	}
 }
 
