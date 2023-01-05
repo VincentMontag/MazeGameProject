@@ -5,6 +5,19 @@
 <title>Maze Game</title>
 
     <style>
+    
+    	#game {
+    		opacity: 1;
+    		position: relative;
+    		width: 1500px;
+    		height: 750px;
+    		float: bottom;
+    	}
+    	
+    	.container {
+    		display: inline-flex;
+    	}
+    
     	div.rocket {
     		z-index: 2;
     		width: 50px;
@@ -35,15 +48,16 @@
     </style>
     	
 </head>
-<body>	
-	<div class="space">
-		<a href="../public/Start.html"><button class="button zurueck">zurück</button></a>
-		<button id="wall_button" onclick="switchView()">Block Wände</button>
+<body>
+		<div class="container">
+			<a href="../public/Start.html"><button class="button zurueck">zurück</button></a>
+			<button id="wall_button" onclick="switchView()">Block Wände</button>
+		</div>		
 		<div id="game">
     		<canvas id = "MazeGame" width = "1500" height = "750"></canvas>
 		</div>	
 		
-</div>
+
 </body>
 
 <script>
