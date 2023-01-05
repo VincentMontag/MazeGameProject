@@ -4,8 +4,7 @@
 <meta charset="UTF-8">
 <title>Maze Game</title>
 
-    <style>
-    
+    <style>    
     	#game {
     		opacity: 1;
     		position: relative;
@@ -14,20 +13,22 @@
     		float: bottom;
     	}
     	
+    	#nameLabel {
+    		color: white;
+    		margin-left: 10px;
+    	}
+    	
     	.container {
     		display: inline-flex;
     	}
     
     	div.rocket {
     		z-index: 2;
-    		width: 50px;
-    		height: 50px;
     		position: absolute;
     		background-size: cover;
     	}    	
     	
     	canvas{
-    		border: 2px solid black;
     		margin: 0;
     		display:block;	
     		float: left;
@@ -49,302 +50,329 @@
     	
 </head>
 <body>
-		<div class="container">
-			<a href="../public/Start.html"><button class="button zurueck">zurück</button></a>
-			<button id="wall_button" onclick="switchView()">Block Wände</button>
-		</div>		
-		<div id="game">
-    		<canvas id = "MazeGame" width = "1500" height = "750"></canvas>
-		</div>	
-		
-
-</body>
-
-<script>
-
-let socket = null;
-let port = null;
-
-//field width
-let fieldWidth = 40;
-// number of horizontal fields
-let mazeWidth = 30;
-//number of vertical fields
-let mazeHeight = 15;
-// canvas width
-let cWidth = fieldWidth * mazeWidth;
-// canvas height
-let cHeight = fieldWidth * mazeHeight;
-// canvas to draw on
-const mazegame2d = document.getElementById("MazeGame").getContext("2d");
-
-function openWebSocket() {
-	console.log("Open websocket");
-	// Create connection to server
-	port = parseInt(location.port)+1;
-	socket = new WebSocket(`ws://${location.hostname}:${port}`);
-	socket.onopen = () => {
-		move("");
-	};
-	socket.onmessage = (event) => {
-		let update = JSON.parse(event.data);		
-		let playerTag = document.querySelector(`#${update.player.username}`);
-		
-		// Make the player visible for the first time by creating a new div
-		if (playerTag == null) {
-			playerTag = document.createElement("div");
-			//playerTag.setAttribute("position", "absolute");
-			playerTag.setAttribute("class", "rocket");
-			playerTag.setAttribute("id", `${update.player.username}`);
-			playerTag.setAttribute("onmousedown", `showName("${update.player.username}")`);
-			playerTag.setAttribute("onmouseup", `hideName("${update.player.username}")`);
-			document.querySelector("#game").appendChild(playerTag);
-
-			var element = document.createElement("div");
-			element.setAttribute("id","username");
-			element.appendChild(document.createTextNode('user: '+`${update.player.username}`));
-			element.style.visibility='hidden';
-			element.style.fontWeight='bold';
-			element
-			document.getElementById(`${update.player.username}`).appendChild(element);
-		}	
-		// Update player div tag
-		
-		// The received player left the game completely, so we remove him
-		if (update.player.status == "dead") 
-			playerTag.remove();
-		// The received player moved, so we update his data
-		else if (update.player.status == "playing")
-			playerTag.setAttribute("style", `left: ${update.player.left * fieldWidth}px; 
-										top: ${update.player.top * fieldWidth}px;
-										background-image: url(${update.player.rocket});
-										transform: rotate(${update.player.direction}deg);
-										opacity: 1;`);
-		// The received player left the game, but his data is still available -> make him transparent
-		else 
-			playerTag.setAttribute("style", `left: ${update.player.left * fieldWidth}px; 
-											top: ${update.player.top * fieldWidth}px;
-											background-image: url(${update.player.rocket});
-											transform: rotate(${update.player.direction}deg);
-											opacity: 0.4;`);
-			
-		
-		
-	};
-	// If the player leaves the Canvas.html, the socket will be closed.
-	// This onclose event provides the server with the player id who left the game 
-	socket.onclose = () => {
+	<div class="container">
+		<a href="../public/Start.html"><button class="button zurueck">Zurück</button></a>
+		<button id="wall_button" onclick="switchView()">Block Wände</button>
+		<div id="nameLabel"></div>
+	</div>		
+	<div id="game">
+    	<canvas id = "MazeGame" width = "1500" height = "750"></canvas>
+	</div>
+	
+	<script>
+	//==========================================================================================================
+	//===========================================STARTING METHODS===============================================
+	//==========================================================================================================
+	
+	let socket = null;
+	let port = null;
+	let maze = null;
+	
+	//field width
+	let fieldWidth = 40;
+	// number of horizontal fields
+	let mazeWidth = 30;
+	//number of vertical fields
+	let mazeHeight = 15;
+	// canvas width
+	let cWidth = fieldWidth * (mazeWidth + 2);
+	// canvas height
+	let cHeight = fieldWidth * (mazeHeight + 2);
+	// canvas to draw on
+	const mazegame = document.getElementById("MazeGame");
+	// context to draw on
+	const mazegame2d = mazegame.getContext("2d");
+	
+	function requireMaze() {
+		mazegame.setAttribute("width", cWidth);
+		mazegame.setAttribute("height", cHeight);
 		var request = new XMLHttpRequest();
-    	request.open("POST", "/markSleeping", true);
-    	request.send();
+		request.open("GET", "/getMaze", true);
+		request.send();
+		request.onload = function () {
+			maze = JSON.parse(request.responseText);
+			drawMaze(maze);
+		}
 	}
-}
-
-//disables arrowkeys for scrolling
-var keys = {};
-window.addEventListener("keydown",
-    function(e){
-        keys[e.code] = true;
-        switch(e.code){
-            case "ArrowUp": case "ArrowDown": case "ArrowLeft": case "ArrowRight":
-            case "Space": e.preventDefault(); break;
-            default: break; // do not block other keys
-        }
-    },
-false);
-window.addEventListener('keyup',
-    function(e){
-        keys[e.code] = false;
-    },
-false);		
 	
-document.onkeydown = checkKey;
-function checkKey(e){
-	e = e ? e : window.event;		
-	if(e.keyCode == '38'){
-		move("UP");
-	} else if(e.keyCode == '40'){
-		move("DOWN");
-	} else if(e.keyCode == '37'){
-		move("LEFT");
-	} else if(e.keyCode == '39'){
-		move("RIGHT");
+	function openWebSocket() {
+		
+		// Create connection to server
+		port = parseInt(location.port)+1;
+		socket = new WebSocket(`ws://${location.hostname}:${port}`);
+		
+		socket.onopen = () => {
+			requireMaze();
+			move("");
+		};
+		
+		socket.onmessage = (event) => {
+			let update = JSON.parse(event.data);		
+			let playerTag = document.querySelector(`#${update.username}`);
+			
+			// Create a new player div if there is no existing player div
+			if (playerTag == null) {
+				playerTag = document.createElement("div");
+				playerTag.setAttribute("class", "rocket");
+				playerTag.setAttribute("id", `${update.username}`);
+				playerTag.setAttribute("onclick", `showName("${update.username}")`);
+				document.querySelector("#game").appendChild(playerTag);
+			}	
+			
+			// The received player left the game completely -> remove him
+			if (update.status == "dead") 
+				playerTag.remove();
+			
+			// The received player has moved -> update his data
+			else if (update.status == "playing")
+				playerTag.setAttribute("style", `left: ${update.left * fieldWidth}px; 
+											top: ${update.top * fieldWidth}px;
+											width: ${fieldWidth}px;
+											height: ${fieldWidth}px;
+											background-image: url(${update.rocket});
+											transform: rotate(${update.direction}deg);
+											opacity: 1;`);
+			
+			// The received player left the game, but his data is still available -> make him transparent
+			else 
+				playerTag.setAttribute("style", `left: ${update.left * fieldWidth}px; 
+												top: ${update.top * fieldWidth}px;
+												width: ${fieldWidth}px;
+												height: ${fieldWidth}px;
+												background-image: url(${update.rocket});
+												transform: rotate(${update.direction}deg);
+												opacity: 0.4;`);
+				
+			
+			
+		};
+		
+		// If the player leaves Canvas.html, the socket will be closed
+		// The server takes the id fron the cookies and mark the player sleeping
+		socket.onclose = () => {
+			var request = new XMLHttpRequest();
+	    	request.open("POST", "/markSleeping", true);
+	    	request.send();
+		}
+		
 	}
-}
-
-function getCookie(name) {
-	let cookie = {};
-	document.cookie.split(';').forEach(function(el) {
-		let [k,v] = el.split('=');
-		cookie[k.trim()] = v;
-	});
-	return cookie[name];
-}
-
-function move(direction) {
-	let action = {
-		id: getCookie("session_id"),
-		dir: direction
+	
+	openWebSocket();
+	
+	//==========================================================================================================
+	//==========================================================================================================
+	//==========================================================================================================
+	
+	//==========================================================================================================
+	//===========================================KEY HANDLING===================================================
+	//==========================================================================================================
+	
+	//disables arrowkeys for scrolling
+	var keys = {};
+	window.addEventListener("keydown",
+	    function(e){
+	        keys[e.code] = true;
+	        switch(e.code){
+	            case "ArrowUp": case "ArrowDown": case "ArrowLeft": case "ArrowRight":
+	            case "Space": e.preventDefault(); break;
+	            default: break; // do not block other keys
+	        }
+	    },
+	false);
+	window.addEventListener('keyup',
+	    function(e){
+	        keys[e.code] = false;
+	    },
+	false);		
+		
+	document.onkeydown = checkKey;
+	function checkKey(e){
+		e = e ? e : window.event;		
+		if(e.keyCode == '38'){
+			move("UP");
+		} else if(e.keyCode == '40'){
+			move("DOWN");
+		} else if(e.keyCode == '37'){
+			move("LEFT");
+		} else if(e.keyCode == '39'){
+			move("RIGHT");
+		}
+	}
+	
+	//==========================================================================================================
+	//==========================================================================================================
+	//==========================================================================================================
+	
+	//==========================================================================================================
+	//============================================PLAYER METHODS================================================
+	//==========================================================================================================
+	
+	function move(direction) {
+		let action = {
+			id: getCookie("session_id"),
+			dir: direction
+		};
+		socket.send(JSON.stringify(action));
+	}
+	
+	function showName(name) {
+		let label = document.getElementById('nameLabel')
+		if (label.innerHTML == "") label.innerHTML = name;
+		else label.innerHTML = "";
+	}
+	
+	//==========================================================================================================
+	//==========================================================================================================
+	//==========================================================================================================
+	
+	//==========================================================================================================
+	//================================================CANVAS METHODS============================================
+	//==========================================================================================================
+	
+	// Clear canvas
+	function clearCanvas() {
+		mazegame2d.beginPath();    // clear existing drawing paths
+		mazegame2d.save();         // store the current transformation matrix
+	
+		// Use the identity matrix while clearing the canvas
+		mazegame2d.setTransform(1, 0, 0, 1, 0, 0);
+		mazegame2d.clearRect(0, 0, 
+				document.getElementById("MazeGame").width, document.getElementById("MazeGame").height);
+	
+		mazegame2d.restore();        // restore the transform
+	}
+	
+	function drawMaze(maze) {
+		for (y = 0; y < mazeHeight+2; y++) {
+			for (x = 0; x < mazeWidth+2; x++) {
+				if ((maze[y][x] & 0b1) == 1)
+					drawLine(// right vertical line
+							fieldWidth * (x + 1), 
+							fieldWidth * y, 
+							fieldWidth * (x + 1), 
+							fieldWidth * (y + 1),
+							mazegame2d); 
+				else if (((maze[y][x] >> 1) & 0b1) == 1)
+					drawLine(// upper horizontal line
+							fieldWidth * x,
+							fieldWidth * y,
+							fieldWidth * (x + 1),
+							fieldWidth * y,
+							mazegame2d);
+				else if (((maze[y][x] >> 2) & 0b1) == 1)
+					drawLine(// left vertical line
+							fieldWidth * x,
+							fieldWidth * y,
+							fieldWidth * x,
+							fieldWidth * (y + 1),
+							mazegame2d);
+				else if (((maze[y][x] >> 3) & 0b1) == 1)
+					drawLine(// lower horizontal line
+							fieldWidth * x,
+							fieldWidth * (y + 1),
+							fieldWidth * (x + 1),
+							fieldWidth * (y + 1),
+							mazegame2d);
+			}
+		}
+		mazegame2d.stroke();
+	}
+		
+	function drawLine(x1, y1, x2, y2, g) {
+		g.moveTo(x1, y1);
+		g.lineTo(x2, y2);
+	}
+	
+	function drawMazeBlockWalls(maze) {
+	    // drawing code here:	
+	    // Choose color to draw with
+	    // rgba (red, green, blue, alpha [= transparency])
+	    // mazegame2d.fillStyle = "rgb(0, 0, 0)";
+	    // fillRect(x, y, width, height) draws filled rectangle
+	 	// strokeRect(x, y, width, height) draws rectangular outline
+	 	// clearRect(x, y, width, height) clears specified arie and makes it transparent
+	   	//-------------------------------------------------
+	    // path = draw points, connect them and fill them to any shape yoou want
+	    // moveTo(x,y) = initial point
+	    // lineTo(x,y) = draw line to somewhere
+	    // fill() = fills everything inside the lines
+	    //-------------------------------------------------
+	    // new Path2D(); empty path obj
+	    // new Path2D(path); copy from another Path2D obj
+	    // Path2d(d); path from SVG path data
+	    //-------------------------------------------------
+	    // Grid:
+		mazegame2d.fillStyle = "rgb(0, 0, 0)";
+		for (y = 0; y < mazeHeight+2; y++) {
+			for (x = 0; x < mazeWidth+2; x++) {
+				if ((maze[y][x] & 0b1) == 1) // right vertical line
+					mazegame2d.fillRect(
+						fieldWidth * (x + 3.0 / 4), 
+						fieldWidth * (y - 1.0 / 4), 
+						fieldWidth * 0.5, 
+						fieldWidth * 1.5);
+				else if (((maze[y][x] >> 1) & 0b1) == 1) // upper horizontal line
+					mazegame2d.fillRect(
+						fieldWidth * (x - 1.0 / 4),
+						fieldWidth * (y - 1.0 / 4),
+						fieldWidth * 1.5,
+						fieldWidth * 0.5);
+				else if (((maze[y][x] >> 2) & 0b1) == 1) // left vertical line
+					mazegame2d.fillRect(
+						fieldWidth * (x - 1.0 / 4),
+						fieldWidth * (y - 1.0 / 4),
+						fieldWidth * 0.5,
+						fieldWidth * 1.5);
+				else if (((maze[y][x] >> 3) & 0b1) == 1) // lower horizontal line
+					mazegame2d.fillRect(
+						fieldWidth * (x - 1.0 / 4),
+						fieldWidth * (y + 3.0 / 4),
+						fieldWidth * 1.5,
+						fieldWidth * 0.5);
+			}
+		}
+		mazegame2d.stroke();	    
+	}
+	
+	function switchView() {
+		let wallButton = document.getElementById("wall_button");
+		clearCanvas();
+		if (wallButton.innerHTML == "Block Wände") {
+			drawMazeBlockWalls(maze);
+			wallButton.innerHTML = "Strich Wände";
+		} else {
+			drawMaze(maze);
+			wallButton.innerHTML = "Block Wände";
+		}
+	}
+	
+	//==========================================================================================================
+	//==========================================================================================================
+	//==========================================================================================================
+	
+	//==========================================================================================================
+	//============================================GENERAL CODE==================================================
+	//==========================================================================================================
+	
+	// On leaving the page
+	window.onbeforeunload = function() {
+		socket.close();
 	};
-	socket.send(JSON.stringify(action));
-}
-
-function showName(name) {
-	document.getElementById('username').style.visibility='visible';
-}
-function hideName(name){
-	document.getElementById('username').style.visibility='hidden';
-}
-
-openWebSocket();
-
-//================================================CANVAS METHODS=========================================
-// Implementation: Presumably, a second websocket connection is necessary reporting
-// the width, height and the the composition of the maze to the clients.
-
-// Clear canvas
-function clearCanvas() {
-	mazegame2d.beginPath();    // clear existing drawing paths
-	mazegame2d.save();         // store the current transformation matrix
-
-	// Use the identity matrix while clearing the canvas
-	mazegame2d.setTransform(1, 0, 0, 1, 0, 0);
-	mazegame2d.clearRect(0, 0, 
-			document.getElementById("MazeGame").width, document.getElementById("MazeGame").height);
-
-	mazegame2d.restore();        // restore the transform
-}
-
-// Set canvas size
-function setCanvasSize() {
-	// TODO size depends on mode in Maze.js
-};
-
-function drawMaze(maze) {
-	for (y = 0; y < mazeHeight+2; y++) {
-		for (x = 0; x < mazeWidth+2; x++) {
-			if ((maze[y][x] & 0b1) == 1)
-				drawLine(// right vertical line
-						fieldWidth * (x + 1), 
-						fieldWidth * y, 
-						fieldWidth * (x + 1), 
-						fieldWidth * (y + 1),
-						mazegame2d); 
-			else if (((maze[y][x] >> 1) & 0b1) == 1)
-				drawLine(// upper horizontal line
-						fieldWidth * x,
-						fieldWidth * y,
-						fieldWidth * (x + 1),
-						fieldWidth * y,
-						mazegame2d);
-			else if (((maze[y][x] >> 2) & 0b1) == 1)
-				drawLine(// left vertical line
-						fieldWidth * x,
-						fieldWidth * y,
-						fieldWidth * x,
-						fieldWidth * (y + 1),
-						mazegame2d);
-			else if (((maze[y][x] >> 3) & 0b1) == 1)
-				drawLine(// lower horizontal line
-						fieldWidth * x,
-						fieldWidth * (y + 1),
-						fieldWidth * (x + 1),
-						fieldWidth * (y + 1),
-						mazegame2d);
-		}
-	}
-	mazegame2d.stroke();
-}
 	
-function drawLine(x1, y1, x2, y2, g) {
-	g.moveTo(x1, y1);
-	g.lineTo(x2, y2);
-}
-
-function drawMazeBlockWalls(maze) {
-    // drawing code here:	
-    // Choose color to draw with
-    // rgba (red, green, blue, alpha [= transparency])
-    // mazegame2d.fillStyle = "rgb(0, 0, 0)";
-    // fillRect(x, y, width, height) draws filled rectangle
- 	// strokeRect(x, y, width, height) draws rectangular outline
- 	// clearRect(x, y, width, height) clears specified arie and makes it transparent
-   	//-------------------------------------------------
-    // path = draw points, connect them and fill them to any shape yoou want
-    // moveTo(x,y) = initial point
-    // lineTo(x,y) = draw line to somewhere
-    // fill() = fills everything inside the lines
-    //-------------------------------------------------
-    // new Path2D(); empty path obj
-    // new Path2D(path); copy from another Path2D obj
-    // Path2d(d); path from SVG path data
-    //-------------------------------------------------
-    // Grid:
-	mazegame2d.fillStyle = "rgb(0, 0, 0)";
-	for (y = 0; y < mazeHeight+2; y++) {
-		for (x = 0; x < mazeWidth+2; x++) {
-			if ((maze[y][x] & 0b1) == 1) // right vertical line
-				mazegame2d.fillRect(
-					fieldWidth * (x + 3.0 / 4), 
-					fieldWidth * (y - 1.0 / 4), 
-					fieldWidth * 0.5, 
-					fieldWidth * 1.5);
-			else if (((maze[y][x] >> 1) & 0b1) == 1) // upper horizontal line
-				mazegame2d.fillRect(
-					fieldWidth * (x - 1.0 / 4),
-					fieldWidth * (y - 1.0 / 4),
-					fieldWidth * 1.5,
-					fieldWidth * 0.5);
-			else if (((maze[y][x] >> 2) & 0b1) == 1) // left vertical line
-				mazegame2d.fillRect(
-					fieldWidth * (x - 1.0 / 4),
-					fieldWidth * (y - 1.0 / 4),
-					fieldWidth * 0.5,
-					fieldWidth * 1.5);
-			else if (((maze[y][x] >> 3) & 0b1) == 1) // lower horizontal line
-				mazegame2d.fillRect(
-					fieldWidth * (x - 1.0 / 4),
-					fieldWidth * (y + 3.0 / 4),
-					fieldWidth * 1.5,
-					fieldWidth * 0.5);
-		}
+	function getCookie(name) {
+		let cookie = {};
+		document.cookie.split(';').forEach(function(el) {
+			let [k,v] = el.split('=');
+			cookie[k.trim()] = v;
+		});
+		return cookie[name];
 	}
-	mazegame2d.stroke();	    
-}
-
-var maze = null;
-
-let curView = 0;
-function switchView() {
-	clearCanvas();
-	if (curView == 0) {
-		curView = 1;
-		drawMazeBlockWalls(maze);
-		document.getElementById("wall_button").innerHTML = "Strich Wände";
-	} else {
-		curView = 0;
-		drawMaze(maze);
-		document.getElementById("wall_button").innerHTML = "Block Wände";
-	}
-}
-
-function requireMaze() {
-	var request = new XMLHttpRequest();
-	request.open("GET", "/getMaze", true);
-	request.send();
-	request.onload = function () {
-		maze = JSON.parse(request.responseText);
-		drawMaze(maze);
-	}
-}
-
-requireMaze();
-
-// On leaving the page
-window.onbeforeunload = function() {
-	socket.close();
-};
-
-</script>
-
+	
+	//==========================================================================================================
+	//==========================================================================================================
+	//==========================================================================================================
+	
+	</script>
+	
+</body>
 </html>

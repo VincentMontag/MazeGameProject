@@ -1,5 +1,5 @@
 /**
- * The MazeRace
+ * The Maze-Race in Space
  */
  
 // Maze.js
@@ -134,20 +134,14 @@ serverSocket.on('connection', function (socket) {
 // If a new player joined the game he has to draw all the active players
 function sendDataFromEveryoneToPlayer(socket) {
 	for (ids in players1) {				
-		let update = {
-			id: ids.substring(2),
-			player: players1[ids]
-		}
+		let update = players1[ids];
 		socket.send(JSON.stringify(update))
 	}
 }
 
 // If a player moved or joined tha game everyone has to update this player data
 function sendPlayerDataToEveryone(serverSocket, actionid) {
-	let update = {
-		id: actionid.substring(2),
-		player: players1[actionid]
-	}
+	let update = players1[actionid];
 	serverSocket.clients.forEach(function each(client) {
 		client.send(JSON.stringify(update));
 	});
