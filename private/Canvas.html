@@ -38,6 +38,7 @@
 <body>	
 	<div class="space">
 		<a href="../public/Start.html"><button class="button zurueck">zurück</button></a>
+		<button id="wall_button" onclick="switchView()">Block Wände</button>
 		<div id="game">
     		<canvas id = "MazeGame" width = "1500" height = "750"></canvas>
 		</div>	
@@ -187,7 +188,18 @@ openWebSocket();
 // Implementation: Presumably, a second websocket connection is necessary reporting
 // the width, height and the the composition of the maze to the clients.
 
+// Clear canvas
+function clearCanvas() {
+	mazegame2d.beginPath();    // clear existing drawing paths
+	mazegame2d.save();         // store the current transformation matrix
 
+	// Use the identity matrix while clearing the canvas
+	mazegame2d.setTransform(1, 0, 0, 1, 0, 0);
+	mazegame2d.clearRect(0, 0, 
+			document.getElementById("MazeGame").width, document.getElementById("MazeGame").height);
+
+	mazegame2d.restore();        // restore the transform
+}
 
 // Set canvas size
 function setCanvasSize() {
@@ -286,13 +298,29 @@ function drawMazeBlockWalls(maze) {
 	mazegame2d.stroke();	    
 }
 
+var maze = null;
+
+let curView = 0;
+function switchView() {
+	clearCanvas();
+	if (curView == 0) {
+		curView = 1;
+		drawMazeBlockWalls(maze);
+		document.getElementById("wall_button").innerHTML = "Strich Wände";
+	} else {
+		curView = 0;
+		drawMaze(maze);
+		document.getElementById("wall_button").innerHTML = "Block Wände";
+	}
+}
+
 function requireMaze() {
 	var request = new XMLHttpRequest();
 	request.open("GET", "/getMaze", true);
 	request.send();
 	request.onload = function () {
 		maze = JSON.parse(request.responseText);
-		drawMazeBlockWalls(maze);
+		drawMaze(maze);
 	}
 }
 
