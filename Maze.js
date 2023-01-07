@@ -1,18 +1,19 @@
 
 const Direction = require('./Direction.js');
 
+const Queue = require('./Queue.js');
+
 let players = {};
 
 let highscores = {};
 
+var shortestPath = -1;
+
+let solPath = [];
+
 let maze = [];
 let w = 0;
 let h = 0;
-
-function getId(player) {
-	for (id in players) if (players[id] == player) return id;
-	return 0;
-}
 
 class Player {
 	
@@ -40,7 +41,10 @@ class Player {
 					time: Date.now()
 				}
 				this.done = true;
-				highscores[JSON.stringify(key)] = this.stepsNeeded;
+				highscores[JSON.stringify(key)] = {
+					steps: this.stepsNeeded, 
+					score: Math.floor(shortestPath / this.stepsNeeded * 100)
+				};
 			}
 			this.stepsNeeded++;
 			return true;
@@ -68,6 +72,7 @@ class Player {
 	}
 	
 }
+
 function addPlayer(id, name) {
 	players[id] = new Player(0, 1, name);
 }
@@ -87,7 +92,7 @@ function getY(id) {
 function generateMaze(width, height) {
 	w = width;
 	h = height;
-	let solvable = false;
+	//let solvable = false;
 	for (i = 0; i < height + 2; i++)
 		maze[i] = [];
 	do {
@@ -95,9 +100,11 @@ function generateMaze(width, height) {
 		buildFrame(width, height);
 		buildEntry();
 		buildExit(width, height);
-		tester = new Player(0, 1, "Tester");
-		solvable = tester.autoMove();
-	} while (!solvable);
+		//tester = new Player(0, 1, "Tester");
+		//solvable = tester.autoMove();
+		checkSolvable();
+	} while (shortestPath == -1);
+	console.log(shortestPath);
 	return maze;
 }
 
@@ -105,7 +112,56 @@ function getHighscores() {
 	return highscores;
 }
 
-module.exports = { addPlayer, movePlayer, getX, getY, generateMaze, getHighscores };
+function shortestPathLength(directions) {
+	let pos = {x: w+1, y: h};
+	while (pos.x != 0) {
+		shortestPath++;
+		solPath.push(pos);
+		pos = directions[pos.y][pos.x].getCoordinates(pos.x, pos.y);
+	}
+	// set highscore
+	let key = {
+		username: "King Of Maze",
+		time: Date.now()
+	}
+	highscores[JSON.stringify(key)] = {
+		steps: shortestPath, 
+		score: 100
+	};
+}
+
+function checkSolvable() {
+	let directions = [];
+	for (i = 0; i < maze.length; i++) directions[i] = [];
+	Queue.offer({x: 0, y: 1, dir: Direction.RIGHT});
+	while (!Queue.empty()) {
+		let u = Queue.poll();
+		if (u.x == w+1) {
+			shortestPathLength(directions);
+			break;
+		}
+		let nDirections = [u.dir.left().left().left(), u.dir, u.dir.left()];
+		for (d of nDirections) {
+			if (isAllowed(u.x, u.y, d)) {
+				let n = d.getCoordinates(u.x, u.y);
+				if (directions[n.y][n.x] === undefined) {
+					directions[n.y][n.x] = d.left().left();
+					Queue.offer({x: n.x, y: n.y, dir: d});
+				}			
+			}
+		}
+	}
+}
+
+function getShortestPath() {
+	return shortestPath;
+}
+
+function getSolution() {
+	return solPath;
+}
+
+module.exports = { addPlayer, movePlayer, getX, getY, generateMaze, getHighscores, getShortestPath, getSolution };
 
 //===============================================================================
 // Methods for creating the maze

@@ -234,45 +234,40 @@
 		mazegame2d.restore();        // restore the transform
 	}
 	
+	function drawSolution(code) {
+		var request = new XMLHttpRequest();
+		request.open("POST", "/getSolution", true);
+		request.setRequestHeader('Content-Type', 'application/json');
+		let json = {c: code};
+    	request.send(JSON.stringify(json));
+		request.onload = function () {
+			if (request.responseText == "") return;
+			let solution = JSON.parse(request.responseText);
+			for (i = 0; i < solution.length - 1; i++)
+				drawLine(solution[i].x, solution[i].y, solution[i+1].x, solution[i+1].y, 0.5);
+			mazegame2d.stroke();
+		}
+	}
+	
 	function drawMaze(maze) {
 		for (y = 0; y < maze.length; y++) {
 			for (x = 0; x < maze[0].length + 1; x++) {
-				if ((maze[y][x] & 0b1) == 1)
-					drawLine(// right vertical line
-							fieldWidth * (x + 1), 
-							fieldWidth * y, 
-							fieldWidth * (x + 1), 
-							fieldWidth * (y + 1),
-							mazegame2d); 
-				else if (((maze[y][x] >> 1) & 0b1) == 1)
-					drawLine(// upper horizontal line
-							fieldWidth * x,
-							fieldWidth * y,
-							fieldWidth * (x + 1),
-							fieldWidth * y,
-							mazegame2d);
-				else if (((maze[y][x] >> 2) & 0b1) == 1)
-					drawLine(// left vertical line
-							fieldWidth * x,
-							fieldWidth * y,
-							fieldWidth * x,
-							fieldWidth * (y + 1),
-							mazegame2d);
-				else if (((maze[y][x] >> 3) & 0b1) == 1)
-					drawLine(// lower horizontal line
-							fieldWidth * x,
-							fieldWidth * (y + 1),
-							fieldWidth * (x + 1),
-							fieldWidth * (y + 1),
-							mazegame2d);
+				if ((maze[y][x] & 0b1) == 1) // right vertical line
+					drawLine(x + 1, y, x + 1, y + 1, 0); 
+				else if (((maze[y][x] >> 1) & 0b1) == 1) // upper horizontal line
+					drawLine(x, y, x + 1, y, 0);
+				else if (((maze[y][x] >> 2) & 0b1) == 1) // left vertical line
+					drawLine(x, y, x, y + 1, 0);
+				else if (((maze[y][x] >> 3) & 0b1) == 1) // lower horizontal line
+					drawLine(x, y + 1, x + 1, y + 1, 0);
 			}
 		}
 		mazegame2d.stroke();
 	}
 		
-	function drawLine(x1, y1, x2, y2, g) {
-		g.moveTo(x1, y1);
-		g.lineTo(x2, y2);
+	function drawLine(x1, y1, x2, y2, shift) {
+		mazegame2d.moveTo((x1 + shift) * fieldWidth, (y1 + shift) * fieldWidth);
+		mazegame2d.lineTo((x2 + shift) * fieldWidth, (y2 + shift) * fieldWidth);
 	}
 	
 	function drawMazeBlockWalls(maze) {

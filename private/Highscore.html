@@ -6,6 +6,9 @@
 			table, th {
   				border: 1px solid black;
 			}
+			td {
+				width: 150px;
+			}
 		</style>
     </head>
     <body>
@@ -15,6 +18,7 @@
     			<th>Spielername</th>
     			<th>Uhrzeit</th>
     			<th>Benötigte Schritte</th>
+    			<th>Erreichte Punkte</th>
   			</tr>
         </table>
         <script>
@@ -27,13 +31,15 @@
 				for (key in data) {
 					let name = JSON.parse(key).username;
 					let time = (new Date(JSON.parse(key).time)).toLocaleTimeString();
-					let steps = data[key];
+					let steps = data[key].steps;
+					let score = data[key].score;
 					
 					table.innerHTML += 
 						`<tr>
 							<td>${name}</td>
 							<td>${time}</td>
 							<td>${steps}</td>
+							<td>${score}</td>
 						</tr>`;
 						
 				}

@@ -9,9 +9,7 @@ function peek() {
 }
 
 function poll() {
-	let toReturn = queue[0];
-	delete queue[0];
-	return toReturn;
+	return queue.splice(0, 1)[0];
 }
 
 function empty() {

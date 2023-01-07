@@ -37,6 +37,13 @@ class Direction{
  			return Direction.RIGHT;
  		}
  	}
+ 	
+ 	getCoordinates(xd, yd) {
+		if (this.num == 0) return {x: xd+1, y: yd};
+		if (this.num == 1) return {x: xd, y: yd-1};
+		if (this.num == 2) return {x: xd-1, y: yd};
+		if (this.num == 3) return {x: xd, y: yd+1};
+	}
 }
 
 module.exports = Direction;

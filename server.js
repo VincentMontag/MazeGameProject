@@ -5,7 +5,9 @@
 // Maze.js
 const maze = require("./Maze.js"); 
 
-const mazeFields = maze.generateMaze(50, 50);
+const mazeFields = maze.generateMaze(40, 30);
+
+const solutionCode = "2943";
 
 var Direction = require('./Direction.js');
  
@@ -52,6 +54,12 @@ server.get("/getMaze", (req, res) => {
 
 server.get("/getHighscore", (req, res) => { 
 	res.send(JSON.stringify(maze.getHighscores()));
+});
+
+server.post("/getSolution", (req, res) => {
+	console.log("received code "+req.body.c);
+	if (req.body.c == solutionCode)	res.send(JSON.stringify(maze.getSolution()));
+	else res.send();
 });
 
 server.post("/getIn", (req, res) => {
