@@ -201,7 +201,7 @@
                     <br>
                     <br>
                 </div>
-                <button class="button highscore" href="" type="Button">Highscore</button>
+                <a href="javascript:openRules('../private/Highscore.html')"><button class="button highscore" onClick="highscore()">Highscore</button></a>
                 <button class="submit" type="Button" onClick="start()">Spiel fortsetzen</button>
                 <a href="javascript:openRules('../private/Regeln.html')"><button class="button regeln">Regeln</button></a>
                 <button class="end" type="Button" onClick="restart()">Neues Spiel</button>
@@ -254,7 +254,7 @@
             		if (request.responseText == "ALREADY_USED") {
             			
             			console.log("This username is already used");
-            			// TODO show that the name is used already
+                  alert("USername ist schon vergeben");
             			
             		} else {
             			location.href = "../private/Canvas.html";
@@ -269,6 +269,15 @@
             	request.onload = function () {
             		start();
             	};  
+            }
+
+            function highscore(){
+              var request = new XMLHttpRequest();
+              request.open("POST", "/highscore", true);
+              request.send();
+              request.onload = function(){
+                start();
+              };
             }
             
         </script>
