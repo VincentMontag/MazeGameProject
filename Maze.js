@@ -1,33 +1,48 @@
 
 const Direction = require('./Direction.js');
 
-players = {}
+let players = {};
+
+let highscores = {};
 
 let maze = [];
 let w = 0;
 let h = 0;
 
+function getId(player) {
+	for (id in players) if (players[id] == player) return id;
+	return 0;
+}
+
 class Player {
 	
-	constructor(x, y) {
+	constructor(x, y, name) {
 		this.x = x;
 		this.y = y;
 		this.dir = Direction.RIGHT;
+		this.stepsNeeded = 0;
+		this.done = false;
+		this.name = name;
 	}
 	
 	// Moves the player if it is allowed.
 	// dir is a matching string
 	move(direction) {
-		if (isAllowed(this.x, this.y, direction)) {
+		if (!this.done && isAllowed(this.x, this.y, direction)) {
 			this.dir = direction;
 			if (direction.equal(Direction.UP)) this.y--;
 			else if (direction.equal(Direction.LEFT)) this.x--;
 			else if (direction.equal(Direction.RIGHT)) this.x++;
 			else if (direction.equal(Direction.DOWN)) this.y++;
 			if (this.x == w + 1) {
-				console.log("Player reached target");
-				//TODO
+				let key = {
+					username: this.name,
+					time: Date.now()
+				}
+				this.done = true;
+				highscores[JSON.stringify(key)] = this.stepsNeeded;
 			}
+			this.stepsNeeded++;
 			return true;
 		}
 		return false;
@@ -53,8 +68,8 @@ class Player {
 	}
 	
 }
-function addPlayer(id) {
-	players[id] = new Player(0, 1);
+function addPlayer(id, name) {
+	players[id] = new Player(0, 1, name);
 }
 
 function movePlayer(id, direction) {
@@ -80,13 +95,17 @@ function generateMaze(width, height) {
 		buildFrame(width, height);
 		buildEntry();
 		buildExit(width, height);
-		tester = new Player(0, 1, null);
+		tester = new Player(0, 1, "Tester");
 		solvable = tester.autoMove();
 	} while (!solvable);
 	return maze;
 }
 
-module.exports = { addPlayer, movePlayer, getX, getY, generateMaze };
+function getHighscores() {
+	return highscores;
+}
+
+module.exports = { addPlayer, movePlayer, getX, getY, generateMaze, getHighscores };
 
 //===============================================================================
 // Methods for creating the maze

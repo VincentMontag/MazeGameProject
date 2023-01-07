@@ -50,6 +50,10 @@ server.get("/getMaze", (req, res) => {
 	res.send(JSON.stringify(mazeFields));
 });
 
+server.get("/getHighscore", (req, res) => { 
+	res.send(JSON.stringify(maze.getHighscores()));
+});
+
 server.post("/getIn", (req, res) => {
 	if (usernameAlreadyUsed(req.body.name)) {
 		res.send("ALREADY_USED");
@@ -59,7 +63,7 @@ server.post("/getIn", (req, res) => {
 	if (session_id === undefined || players1[session_id] === undefined) {
 		session_id = JSON.stringify(Math.random());
 		res.cookie("session_id", session_id);
-		maze.addPlayer(session_id);
+		maze.addPlayer(session_id, req.body.name);
 		let playerData = {
 			username: req.body.name,
 			rocket: getImagePath(req.body.rocket),

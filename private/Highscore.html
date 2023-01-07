@@ -1,12 +1,43 @@
 <Doctype Html>
 <html>
     <head>
-
+    	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+		<style>
+			table, th {
+  				border: 1px solid black;
+			}
+		</style>
     </head>
     <body>
         <h2>Highscore</h2>
-        <div>
-            
-        </div>
+        <table id="scores">
+        	<tr>
+    			<th>Spielername</th>
+    			<th>Uhrzeit</th>
+    			<th>Benötigte Schritte</th>
+  			</tr>
+        </table>
+        <script>
+        	var request = new XMLHttpRequest();
+			request.open("GET", "/getHighscore", true);
+			request.send();
+			request.onload = function () {
+				let data = JSON.parse(request.responseText);
+				let table = document.getElementById("scores");
+				for (key in data) {
+					let name = JSON.parse(key).username;
+					let time = (new Date(JSON.parse(key).time)).toLocaleTimeString();
+					let steps = data[key];
+					
+					table.innerHTML += 
+						`<tr>
+							<td>${name}</td>
+							<td>${time}</td>
+							<td>${steps}</td>
+						</tr>`;
+						
+				}
+			}
+        </script>
     </body>
 </html>
