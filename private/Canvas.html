@@ -70,27 +70,19 @@
 	
 	//field width
 	let fieldWidth = 40;
-	// number of horizontal fields
-	let mazeWidth = 30;
-	//number of vertical fields
-	let mazeHeight = 15;
-	// canvas width
-	let cWidth = fieldWidth * (mazeWidth + 2);
-	// canvas height
-	let cHeight = fieldWidth * (mazeHeight + 2);
 	// canvas to draw on
 	const mazegame = document.getElementById("MazeGame");
 	// context to draw on
 	const mazegame2d = mazegame.getContext("2d");
 	
 	function requireMaze() {
-		mazegame.setAttribute("width", cWidth);
-		mazegame.setAttribute("height", cHeight);
 		var request = new XMLHttpRequest();
 		request.open("GET", "/getMaze", true);
 		request.send();
 		request.onload = function () {
 			maze = JSON.parse(request.responseText);
+			mazegame.setAttribute("width", fieldWidth * (maze[0].length + 1));
+			mazegame.setAttribute("height", fieldWidth * maze.length);
 			drawMaze(maze);
 		}
 	}
@@ -243,8 +235,8 @@
 	}
 	
 	function drawMaze(maze) {
-		for (y = 0; y < mazeHeight+2; y++) {
-			for (x = 0; x < mazeWidth+2; x++) {
+		for (y = 0; y < maze.length; y++) {
+			for (x = 0; x < maze[0].length + 1; x++) {
 				if ((maze[y][x] & 0b1) == 1)
 					drawLine(// right vertical line
 							fieldWidth * (x + 1), 
@@ -301,10 +293,8 @@
 	    // new Path2D(path); copy from another Path2D obj
 	    // Path2d(d); path from SVG path data
 	    //-------------------------------------------------
-	    // Grid:
-		mazegame2d.fillStyle = "rgb(0, 0, 0)";
-		for (y = 0; y < mazeHeight+2; y++) {
-			for (x = 0; x < mazeWidth+2; x++) {
+		for (y = 0; y < maze.length; y++) {
+			for (x = 0; x < maze[0].length+1; x++) {
 				if ((maze[y][x] & 0b1) == 1) // right vertical line
 					mazegame2d.fillRect(
 						fieldWidth * (x + 3.0 / 4), 
