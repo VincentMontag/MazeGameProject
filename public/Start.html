@@ -173,6 +173,19 @@
 		    transform: scale(1);
 		    transition: visibility 0s linear 0s, opacity 0.25s 0s, transform 0.25s;
 		}
+		
+		table, th {
+  			border: 1px solid white;
+  			margin: 0 auto;
+		}
+		
+		td {
+			width: 150px;
+		}
+		
+		#score {
+        	text-align: center;
+		}
 
     </style>
         <title>Labyrinth</title>
@@ -248,20 +261,14 @@
                     <br>
                     <br>
                 </div>
-                <a href="javascript:openRules('../private/Highscore.html')"><button class="button highscore" onClick="highscore()">Highscore</button></a>
+                <button class="trigger" onClick="highscore()">Highscore</button>
                 <button class="submit" type="Button" onClick="start()">Spiel fortsetzen</button>
-                <button class="end" type="Button" onClick="restart()">Neues Spiel</button>
-                
-                <button class="trigger">Regeln</button>
+                <button class="end" type="Button" onClick="restart()">Neues Spiel</button>                
+                <button class="trigger" onClick="rules()">Regeln</button>
 				<div class="modal">
     				<div class="modal-content">
         				<span class="close-button">&times;</span>
-        				<h1>Das Space Maze Race ist ein von Studenten entwickeltes Spiel, welches im Browser spielbar ist. 
-            				In diesem Spiel geht es darum, seine Rakete schnellstmöglich durch das Maze zu leiten. Es gibt da aber ein paar Schwierigkeiten, denn 
-            				das Spielfeld verändert sich in einem bestimmten Zeitraum. Außerdem fängt das Maze an zu flackern, kurz bevor es sich verändert.
-            				Auch kann man die Größe des Spielfeldes einstellen Man kann zwischen 
-            				Einfach, Mittel und schwer wählen, wobei dann die Größe des Spielfeldes angepasst wird. 
-            				Weitere Schwierigkeiten werden noch folgen.</h1>
+        				<div id="content"></div>        				
     				</div>
 				</div>
 
@@ -269,6 +276,56 @@
         </div>       
       
         <script>
+        
+        	function highscore() {
+        		// Create table
+        		let table = document.createElement("table");
+        		table.setAttribute("id", "scores");
+        		table.innerHTML +=
+        			`<tr>
+        				<th>Spielername</th>
+        				<th>Uhrzeit</th>
+        				<th>Benötigte Schritte</th>
+        				<th>Erreichte Punkte</th>
+      				</tr>`;
+      			document.getElementById("content").innerHTML = "";
+      			document.getElementById("content").appendChild(table);
+      				
+      			// Get score data
+            	var request = new XMLHttpRequest();
+    			request.open("GET", "/getHighscore", true);
+    			request.send();
+    			request.onload = function () {
+    				let data = JSON.parse(request.responseText);
+    				for (key in data) {
+    					let name = JSON.parse(key).username;
+    					let time = (new Date(JSON.parse(key).time)).toLocaleTimeString();
+    					let steps = data[key].steps;
+    					let score = data[key].score;
+    					
+    					table.innerHTML += 
+    						`<tr>
+    							<td>${name}</td>
+    							<td>${time}</td>
+    							<td>${steps}</td>
+    							<td>${score}</td>
+    						</tr>`;
+    						
+    				}
+    			}
+        	}
+        	
+        	function rules() {
+        		document.getElementById("content").innerHTML = "";
+        		document.getElementById("content").innerHTML = 
+        			`<h1>'Maze-Race in Space' ist ein von Studenten entwickeltes Browser-Spiel. In diesem Spiel 
+        			geht es darum, seine Rakete über einen möglichst kurzen Pfad durch das Labyrinth zu 
+        			leiten. 100 Punkte für jeden, der mit dem 'King Of Maze' mithalten kann. Sein Erfolg
+        			lässt sich in der Highscore-Liste an erster Stelle begutachten.</h1>
+        			<h1>10 verschiedenfarbige Raketen ermöglichen eine Unterscheidung der aktiven Spieler. Für
+        			absolute Klarheit ist es möglich, per Klick auf einen Spieler dessen einzigartigen 
+        			Namen zu erhalten.</h1>`;
+        	}
             
             let slideIndex = 1;
             showSlides(slideIndex);
@@ -329,7 +386,7 @@
             
             // Used for creating the modal pop-up
             const modal = document.querySelector(".modal");
-			const trigger = document.querySelector(".trigger");
+			const triggers = document.querySelectorAll(".trigger");
 			const closeButton = document.querySelector(".close-button");
 			
 			function toggleModal() {
@@ -342,7 +399,7 @@
 			    }
 			}
 			
-			trigger.addEventListener("click", toggleModal);
+			triggers.forEach(trigger => trigger.addEventListener("click", toggleModal));
 			closeButton.addEventListener("click", toggleModal);
 			window.addEventListener("click", windowOnClick);
             
