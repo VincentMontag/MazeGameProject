@@ -5,7 +5,7 @@
 // Maze.js
 const maze = require("./Maze.js"); 
 
-const mazeFields = maze.generateMaze(40, 30);
+const mazeFields = maze.generateMaze(40, 25);
 
 const solutionCode = "2943";
 
