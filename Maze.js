@@ -52,25 +52,6 @@ class Player {
 		return false;
 	}
 	
-	// Performes the movement through the whole maze
-	autoMove() {
-		let current = Direction.RIGHT;
-		while (true) {
-			if (isAllowed(this.x, this.y, current.left())) {
-				this.move(current.left()); 
-				current = current.left();
-			} else if (isAllowed(this.x, this.y, current)) {
-				this.move(current);
-			} else if (isAllowed(this.x, this.y, current.left().left())) {
-				current = current.left().left();
-			} else {
-				current = current.left().left().left();
-			}
-			if (this.x == 0 && this.y == 1) return false;
-			else if (this.x == w + 1) return true;		
-		}
-	}
-	
 }
 
 function addPlayer(id, name) {
@@ -92,7 +73,6 @@ function getY(id) {
 function generateMaze(width, height) {
 	w = width;
 	h = height;
-	//let solvable = false;
 	for (i = 0; i < height + 2; i++)
 		maze[i] = [];
 	do {
@@ -100,11 +80,8 @@ function generateMaze(width, height) {
 		buildFrame(width, height);
 		buildEntry();
 		buildExit(width, height);
-		//tester = new Player(0, 1, "Tester");
-		//solvable = tester.autoMove();
 		checkSolvable();
 	} while (shortestPath == -1);
-	console.log(shortestPath);
 	return maze;
 }
 
