@@ -98,7 +98,7 @@ function shortestPathLength(directions) {
 	}
 	// set highscore
 	let key = {
-		username: "King Of Maze",
+		username: "Irrgartenkönig",
 		time: Date.now()
 	}
 	highscores[JSON.stringify(key)] = {
