@@ -70,6 +70,10 @@ server.post("/getIn", (req, res) => {
 		res.send("ALREADY_USED");
 		return;
 	}
+	if (req.body.name == "") {
+		res.send("EMPTY_NAME");
+		return;
+	}
 	let session_id = req.cookies.session_id;
 	if (session_id === undefined || players1[session_id] === undefined) {
 		session_id = JSON.stringify(Math.random());
