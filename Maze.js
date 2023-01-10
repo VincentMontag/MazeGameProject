@@ -7,10 +7,6 @@ const Queue = require('./Queue.js');
 
 let players = {};
 
-let highscores = {};
-
-var shortestPath = -1;
-
 let solPath = [];
 
 let maze = [];
@@ -44,18 +40,18 @@ function generateMaze(width, height, setHighscore) {
 		buildEntry();
 		buildExit(width, height);
 		checkSolvable(setHighscore);
-	} while (shortestPath == -1);
+	} while (Player.shortestPath == -1);
 	return maze;
 }
 
 function getHighscores() {
-	return highscores;
+	return Player.highscores;
 }
 
 function shortestPathLength(directions, setHighscore) {
 	let pos = {x: w+1, y: h};
 	while (pos.x != 0) {
-		shortestPath++;
+		Player.shortestPath++;
 		solPath.push(pos);
 		pos = directions[pos.y][pos.x].getCoordinates(pos.x, pos.y);
 	}
@@ -65,8 +61,8 @@ function shortestPathLength(directions, setHighscore) {
 			username: "Irrgartenkönig",
 			time: Date.now()
 		}
-		highscores[JSON.stringify(key)] = {
-			steps: shortestPath, 
+		Player.highscores[JSON.stringify(key)] = {
+			steps: Player.shortestPath, 
 			score: 100
 		};
 	}	

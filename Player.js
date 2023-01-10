@@ -1,5 +1,9 @@
 class Player {
 	
+	static highscores = {};
+	
+	static shortestPath = -1;
+	
 	constructor(x, y, name) {
 		this.x = x;
 		this.y = y;
