@@ -1,3 +1,5 @@
+const Direction = require('./Direction.js');
+
 class Player {
 	
 	static highscores = {};
