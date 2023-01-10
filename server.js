@@ -125,15 +125,6 @@ server.post("/markSleeping", (req, res) => {
 	res.send();
 });
 
-serverSocketMaze.on('connection', function (socket) {
-	console.log("WebSocket connection built for generating the maze");
-	
-	socket.onmessage = function incoming (event) {
-		// Client received the maze
-		// Now give him 3 ghost steps
-	};
-});
-
 function sendMazeToClients() {
 	mazeFields = maze.generateMaze(40, 25, false);
 	serverSocketMaze.clients.forEach(function each(client) {
