@@ -35,7 +35,7 @@ function getY(id) {
 	return players[id].y;
 }
 
-function generateMaze(width, height, setHighscore) {
+function generateMaze(width, height) {
 	w = width;
 	h = height;
 	shortestPath = -1;
@@ -46,7 +46,7 @@ function generateMaze(width, height, setHighscore) {
 		buildFrame(width, height);
 		buildEntry();
 		buildExit(width, height);
-		checkSolvable(setHighscore, new MazeInteraction(maze));
+		checkSolvable(new MazeInteraction(maze));
 	} while (shortestPath == -1);
 	Player.setMazeInteraction(new MazeInteraction(maze));
 	return maze;
@@ -64,7 +64,9 @@ function getShortestDistance() {
 	return shortestPath;
 }
 
-function shortestPathLength(directions, setHighscore) {
+var keyIrrgartenkoenig = null;
+
+function shortestPathLength(directions) {
 	let pos = {x: w+1, y: h};
 	while (pos.x != 0) {
 		shortestPath++;
@@ -72,19 +74,19 @@ function shortestPathLength(directions, setHighscore) {
 		pos = directions[pos.y][pos.x].getCoordinates(pos.x, pos.y);
 	}
 	// set highscore
-	if (setHighscore) {
-		let key = {
-			username: "Irrgartenkönig",
-			time: Date.now()
-		}
-		highscores[JSON.stringify(key)] = {
-			steps: shortestPath, 
-			score: 100
-		};
-	}	
+	if (keyIrrgartenkoenig != null) delete highscores[keyIrrgartenkoenig];
+	let key = {
+		username: "Irrgartenkönig",
+		time: Date.now()
+	}
+	keyIrrgartenkoenig = JSON.stringify(key);
+	highscores[keyIrrgartenkoenig] = {
+		steps: shortestPath, 
+		score: 100
+	};	
 }
 
-function checkSolvable(setHighscore, mi) {
+function checkSolvable(mi) {
 	queue = new Queue();
 	let directions = [];
 	for (i = 0; i < maze.length; i++) directions[i] = [];

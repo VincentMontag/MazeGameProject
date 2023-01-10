@@ -83,7 +83,7 @@
 			maze = JSON.parse(request.responseText);
 			mazegame.setAttribute("width", fieldWidth * (maze[0].length + 1));
 			mazegame.setAttribute("height", fieldWidth * maze.length);
-			drawMaze(maze);
+			switchView();
 		}
 	}
 	
