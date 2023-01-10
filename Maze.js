@@ -49,6 +49,7 @@ function generateMaze(width, height) {
 		checkSolvable(new MazeInteraction(maze));
 	} while (shortestPath == -1);
 	Player.setMazeInteraction(new MazeInteraction(maze));
+	console.log("server finished at "+Date.now());
 	return maze;
 }
 
