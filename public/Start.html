@@ -186,6 +186,49 @@
 		#score {
         	text-align: center;
 		}
+		
+	    	/* Empty space */
+		#spaceBetweenButtons{
+			padding: 10px;
+		}
+	    
+		/* PlayButton and ContinueButton Design */
+		#playButton, #continueButton{
+			padding: 13px;
+  			font-size: 13px;
+  			cursor: pointer;
+  			border-radius:8px;
+			display:inline-block;
+		}
+	    
+		/* HighscoreButton and DescriptionButton Design */
+		#highscoreButton, #descriptionButton{
+			padding: 13px;
+  			font-size: 13px;
+  			cursor: pointer;
+  			border-radius:8px;
+		}
+		
+	    	/* RaceButton and PlayerNumer, SelectDrop Design */
+		#raceButton, #playerNumber, #selectDrop{
+			padding: 13px;
+  			font-size: 13px;
+  			cursor: pointer;
+  			border-radius:8px;
+			display:inline-block;
+		}
+		
+		#playerNumber{
+			pointer-events:none;
+			padding-top:0%;
+			padding-bottom:0%;
+		}
+		
+		#selectDrop{
+			pointer-events:all;
+			padding-top:6%;
+			padding-bottom:6%;
+		}
 
     </style>
         <title>Labyrinth</title>
@@ -261,10 +304,34 @@
                     <br>
                     <br>
                 </div>
-                <button class="trigger" onClick="highscore()">Highscore</button>
-                <button class="submit" type="Button" onClick="start()">Spiel fortsetzen</button>
-                <button class="end" type="Button" onClick="restart()">Neues Spiel</button>                
-                <button class="trigger" onClick="rules()">Beschreibung</button>
+                        
+                <button id="playButton" class="end" type="Button" onClick="restart()">Neues Spiel</button>                
+                <button id="continueButton" class="submit" type="Button" onClick="start()">Spiel fortsetzen</button>
+                
+                <div id="spaceBetweenButtons"></div>
+                
+               	<button id="raceButton" class="submit" type="Button" onClick="">Rennen</button>
+               	<button id="playerNumber" class="submit" type="Button">Mitspieleranzahl:
+               	<form id="selectDrop" name="dropForm">
+      				<select name="dropSelect">
+         				<option value="2">2</option>
+         				<option value="3">3</option>
+         				<option value="4">4</option>
+         				<option value="5">5</option>
+         				<option value="6">6</option>
+         				<option value="7">7</option>
+         				<option value="8">8</option>
+         				<option value="9">9</option>
+         				<option value="10">10</option>
+      				</select>
+   				</form>
+   				</button>
+               	
+               	<div id="spaceBetweenButtons"></div>
+                
+                <button id="highscoreButton" class="trigger" onClick="highscore()">Highscore</button>
+                <button id="descriptionButton" class="trigger" onClick="rules()">Beschreibung</button>
+                
 				<div class="modal">
     				<div class="modal-content">
         				<span class="close-button">&times;</span>
