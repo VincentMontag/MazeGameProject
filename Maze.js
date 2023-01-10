@@ -38,6 +38,7 @@ function getY(id) {
 function generateMaze(width, height, setHighscore) {
 	w = width;
 	h = height;
+	shortestPath = -1;
 	for (i = 0; i < height + 2; i++)
 		maze[i] = [];
 	do {
