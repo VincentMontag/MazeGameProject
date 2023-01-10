@@ -7,6 +7,10 @@ const Queue = require('./Queue.js');
 
 let players = {};
 
+highscores = {};
+	
+shortestPath = -1;
+
 let solPath = [];
 
 let maze = [];
@@ -39,19 +43,24 @@ function generateMaze(width, height, setHighscore) {
 		buildFrame(width, height);
 		buildEntry();
 		buildExit(width, height);
-		checkSolvable(setHighscore);
-	} while (Player.shortestPath == -1);
+		checkSolvable(setHighscore, new MazeInteraction(maze));
+	} while (shortestPath == -1);
+	Player.mi = new MazeInteraction(maze);
 	return maze;
 }
 
 function getHighscores() {
-	return Player.highscores;
+	return highscores;
+}
+
+function setHighscore(key, value) {
+	highscores[key] = value;
 }
 
 function shortestPathLength(directions, setHighscore) {
 	let pos = {x: w+1, y: h};
 	while (pos.x != 0) {
-		Player.shortestPath++;
+		shortestPath++;
 		solPath.push(pos);
 		pos = directions[pos.y][pos.x].getCoordinates(pos.x, pos.y);
 	}
@@ -61,14 +70,14 @@ function shortestPathLength(directions, setHighscore) {
 			username: "Irrgartenkönig",
 			time: Date.now()
 		}
-		Player.highscores[JSON.stringify(key)] = {
+		highscores[JSON.stringify(key)] = {
 			steps: Player.shortestPath, 
 			score: 100
 		};
 	}	
 }
 
-function checkSolvable(setHighscore) {
+function checkSolvable(setHighscore, mi) {
 	let directions = [];
 	for (i = 0; i < maze.length; i++) directions[i] = [];
 	Queue.offer({x: 0, y: 1, dir: Direction.RIGHT});
@@ -80,7 +89,7 @@ function checkSolvable(setHighscore) {
 		}
 		let nDirections = [u.dir.left().left().left(), u.dir, u.dir.left()];
 		for (d of nDirections) {
-			if (isAllowed(u.x, u.y, d)) {
+			if (mi.isAllowed(u.x, u.y, d)) {
 				let n = d.getCoordinates(u.x, u.y);
 				if (directions[n.y][n.x] === undefined) {
 					directions[n.y][n.x] = d.left().left();
@@ -99,7 +108,8 @@ function getSolution() {
 	return solPath;
 }
 
-module.exports = { addPlayer, movePlayer, getX, getY, generateMaze, getHighscores, getShortestPath, getSolution };
+module.exports = { addPlayer, movePlayer, getX, getY, generateMaze, 
+getHighscores, setHighscore, getShortestPath, getSolution };
 
 //===============================================================================
 // Methods for creating the maze
@@ -145,31 +155,41 @@ function buildExit(width, height) {
 //===============================================================================
 //===============================================================================
 
-/*
-Proves if you can move into the given direction startet at x, y.
-hintedMaze = true if this step should be performed on the hinted maze
-*/
-function isAllowed(x, y, direction) {
-	if (direction.equal(Direction.RIGHT) &&
-		(hasWall(x, y, Direction.RIGHT) || hasWall(x + 1, y, Direction.LEFT))) 
-			return false;
-	if (direction.equal(Direction.UP) && 
-		(hasWall(x, y, Direction.UP) || hasWall(x, y - 1, Direction.DOWN)))
-			return false;
-	if (direction.equal(Direction.LEFT) &&
-		(hasWall(x, y, Direction.LEFT) || hasWall(x - 1, y, Direction.RIGHT)))
-			return false;
-	if (direction.equal(Direction.DOWN) &&
-		(hasWall(x, y, Direction.DOWN) || hasWall(x, y + 1, Direction.UP)) )
-			return false;
-	return true;
+class MazeInteraction {
+	
+	constructor(maze) {
+		this.maze = maze;
+	}
+	
+	/*
+	Proves if you can move into the given direction startet at x, y.
+	hintedMaze = true if this step should be performed on the hinted maze
+	*/
+	isAllowed(x, y, direction) {
+		if (direction.equal(Direction.RIGHT) &&
+			(hasWall(x, y, Direction.RIGHT) || hasWall(x + 1, y, Direction.LEFT))) 
+				return false;
+		if (direction.equal(Direction.UP) && 
+			(hasWall(x, y, Direction.UP) || hasWall(x, y - 1, Direction.DOWN)))
+				return false;
+		if (direction.equal(Direction.LEFT) &&
+			(hasWall(x, y, Direction.LEFT) || hasWall(x - 1, y, Direction.RIGHT)))
+				return false;
+		if (direction.equal(Direction.DOWN) &&
+			(hasWall(x, y, Direction.DOWN) || hasWall(x, y + 1, Direction.UP)) )
+				return false;
+		return true;
+	}
+	
+	/*
+	Checks if there is a wall at (x, y) in direction d. 
+	hinted = true if the check should be proceeded on the hinted maze
+	*/	
+	hasWall(x, y, d) {
+		if (x < 0 || y < 0 || x > w + 1 || y > h + 1) return true;
+		return ((this.maze[y][x] >> d.num) & 0b1) == 1; 
+	}
+	
 }
 
-/*
-Checks if there is a wall at (x, y) in direction d. 
-hinted = true if the check should be proceeded on the hinted maze
-*/	
-function hasWall(x, y, d) {
-	if (x < 0 || y < 0 || x > w + 1 || y > h + 1) return true;
-	return ((maze[y][x] >> d.num) & 0b1) == 1; 
-}
+
