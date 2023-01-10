@@ -5,7 +5,7 @@
 // Maze.js
 const maze = require("./Maze.js"); 
 
-const mazeFields = maze.generateMaze(40, 25);
+let mazeFields = maze.generateMaze(40, 25, true);
 
 const solutionCode = "2943";
 
@@ -17,6 +17,7 @@ const server = express();
 const cookieparser = require("cookie-parser");
 const fs = require("fs");
 const path = require("path");
+const WebSocket = require("ws");
 
 server.use(cookieparser());
 // The folder with all html files
@@ -36,9 +37,11 @@ server.listen(portnumber, function ()  {
     console.log('listening at port ' + portnumber);
 });
 
-// WebSocket
-const WebSocket = require("ws");
-const serverSocket = new WebSocket.Server({ port: (portnumber+1) });
+// WebSocket for player move information
+const serverSocket = new WebSocket.Server({ port: (portnumber + 1) });
+
+// WebSocket for maze change information
+const serverSocketMaze = new WebSocket.Server({ port: (portnumber + 2) });
 
 players1 = {}
 
@@ -118,8 +121,24 @@ server.post("/markSleeping", (req, res) => {
 	res.send();
 });
 
+serverSocketMaze.on('connection', function (socket) {
+	console.log("WebSocket connection built for generating the maze");
+	
+	socket.onmessage = function incoming (event) {
+		// Client received the maze
+		// Now give him 3 ghost steps
+	};
+});
+
+function sendMazeToClients() {
+	mazeFields = maze.generateMaze(40, 25, false);
+	serverSocketMaze.clients.forEach(function each(client) {
+		client.send(JSON.stringify(update));
+	});
+}
+
 serverSocket.on('connection', function (socket) {
-	console.log("Connection built");
+	console.log("WebSocket connection built for moving");
 	
 	socket.onmessage = function incoming(event) {
 		let action = JSON.parse(event.data);

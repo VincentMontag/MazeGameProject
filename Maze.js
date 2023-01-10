@@ -70,7 +70,7 @@ function getY(id) {
 	return players[id].y;
 }
 
-function generateMaze(width, height) {
+function generateMaze(width, height, setHighscore) {
 	w = width;
 	h = height;
 	for (i = 0; i < height + 2; i++)
@@ -80,7 +80,7 @@ function generateMaze(width, height) {
 		buildFrame(width, height);
 		buildEntry();
 		buildExit(width, height);
-		checkSolvable();
+		checkSolvable(setHighscore);
 	} while (shortestPath == -1);
 	return maze;
 }
@@ -89,7 +89,7 @@ function getHighscores() {
 	return highscores;
 }
 
-function shortestPathLength(directions) {
+function shortestPathLength(directions, setHighscore) {
 	let pos = {x: w+1, y: h};
 	while (pos.x != 0) {
 		shortestPath++;
@@ -97,24 +97,26 @@ function shortestPathLength(directions) {
 		pos = directions[pos.y][pos.x].getCoordinates(pos.x, pos.y);
 	}
 	// set highscore
-	let key = {
-		username: "Irrgartenkönig",
-		time: Date.now()
-	}
-	highscores[JSON.stringify(key)] = {
-		steps: shortestPath, 
-		score: 100
-	};
+	if (setHighscore) {
+		let key = {
+			username: "Irrgartenkönig",
+			time: Date.now()
+		}
+		highscores[JSON.stringify(key)] = {
+			steps: shortestPath, 
+			score: 100
+		};
+	}	
 }
 
-function checkSolvable() {
+function checkSolvable(setHighscore) {
 	let directions = [];
 	for (i = 0; i < maze.length; i++) directions[i] = [];
 	Queue.offer({x: 0, y: 1, dir: Direction.RIGHT});
 	while (!Queue.empty()) {
 		let u = Queue.poll();
 		if (u.x == w+1) {
-			shortestPathLength(directions);
+			shortestPathLength(directions, setHighscore);
 			break;
 		}
 		let nDirections = [u.dir.left().left().left(), u.dir, u.dir.left()];
