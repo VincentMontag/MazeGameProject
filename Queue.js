@@ -1,19 +1,24 @@
-let queue = [];
+class Queue {
+	
+	constructor() {
+		this.queue = [];
+	}
 
-function offer(element) {
-	queue.push(element);
+	offer(element) {
+		this.queue.push(element);
+	}
+	
+	peek() {
+		return this.queue[0];
+	}
+	
+	poll() {
+		return this.queue.splice(0, 1)[0];
+	}
+	
+	empty() {
+		return this.queue.length == 0;
+	}
 }
 
-function peek() {
-	return queue[0];
-}
-
-function poll() {
-	return queue.splice(0, 1)[0];
-}
-
-function empty() {
-	return queue.length == 0;
-}
-
-module.exports = {offer, peek, poll, empty};
+module.exports = Queue;

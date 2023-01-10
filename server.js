@@ -133,9 +133,12 @@ serverSocketMaze.on('connection', function (socket) {
 function sendMazeToClients() {
 	mazeFields = maze.generateMaze(40, 25, false);
 	serverSocketMaze.clients.forEach(function each(client) {
-		client.send(JSON.stringify(update));
+		client.send(JSON.stringify(mazeFields));
 	});
+	setTimeout(sendMazeToClients, 30000);
 }
+
+setTimeout(sendMazeToClients, 30000);
 
 serverSocket.on('connection', function (socket) {
 	console.log("WebSocket connection built for moving");

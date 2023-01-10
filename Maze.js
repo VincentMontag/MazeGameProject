@@ -84,12 +84,13 @@ function shortestPathLength(directions, setHighscore) {
 }
 
 function checkSolvable(setHighscore, mi) {
+	queue = new Queue();
 	let directions = [];
 	for (i = 0; i < maze.length; i++) directions[i] = [];
-	Queue.offer({x: 0, y: 1, dir: Direction.RIGHT});
-	while (!Queue.empty()) {
-		let u = Queue.poll();
-		if (u.x == w+1) {
+	queue.offer({x: 0, y: 1, dir: Direction.RIGHT});
+	while (!queue.empty()) {
+		let u = queue.poll();
+		if (u.x == w + 1) {
 			shortestPathLength(directions, setHighscore);
 			break;
 		}
@@ -99,7 +100,7 @@ function checkSolvable(setHighscore, mi) {
 				let n = d.getCoordinates(u.x, u.y);
 				if (directions[n.y][n.x] === undefined) {
 					directions[n.y][n.x] = d.left().left();
-					Queue.offer({x: n.x, y: n.y, dir: d});
+					queue.offer({x: n.x, y: n.y, dir: d});
 				}			
 			}
 		}

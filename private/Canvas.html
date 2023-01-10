@@ -65,8 +65,8 @@
 	//==========================================================================================================
 	
 	let socket = null;
-	let port = null;
 	let maze = null;
+	let mazeSocket = null;
 	
 	//field width
 	let fieldWidth = 40;
@@ -87,15 +87,33 @@
 		}
 	}
 	
+	function openMazeWebSocket() {
+		mazeSocket = new WebSocket(`ws://${location.hostname}:${parseInt(location.port)+2}`);
+		
+		mazeSocket.onopen = () => {
+			requireMaze();
+			move("");
+		};
+		
+		mazeSocket.onmessage = (event) => {
+			let maze = JSON.parse(event.data);
+			let wallButton = document.getElementById("wall_button");
+			clearCanvas();
+			if (wallButton.innerHTML == "Block Wände") {
+				drawMaze(maze);
+			} else {
+				drawMazeBlockWalls(maze);
+			}
+		};
+	}
+	
 	function openWebSocket() {
 		
 		// Create connection to server
-		port = parseInt(location.port)+1;
-		socket = new WebSocket(`ws://${location.hostname}:${port}`);
+		socket = new WebSocket(`ws://${location.hostname}:${parseInt(location.port)+1}`);
 		
 		socket.onopen = () => {
-			requireMaze();
-			move("");
+			openMazeWebSocket();			
 		};
 		
 		socket.onmessage = (event) => {
@@ -343,6 +361,7 @@
 	// On leaving the page
 	window.onbeforeunload = function() {
 		socket.close();
+		mazeSocket.close();
 	};
 	
 	function getCookie(name) {
