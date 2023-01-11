@@ -305,7 +305,7 @@
                 </div>
                         
                 <button id="playButton" class="end" type="Button" onClick="restart()">Neues Spiel</button>                
-                <button id="continueButton" class="submit" type="Button" onClick="start()">Spiel fortsetzen</button>
+                <button id="continueButton" class="submit" type="Button" onClick="resume()">Spiel fortsetzen</button>
                 
                 <div id="spaceBetweenButtons"></div>
                 
@@ -419,19 +419,28 @@
               "resizable=yes,status=no,menubar=yes,location=no,scrollbars=yes,toolbar=no");
             }
             
-            function start() {
-            	// Initialize player
-            	let player = {
-            		name: document.getElementById('username').value,
-            		rocket: slideIndex
-            	}            	
+            function resume() {            	          	
             	var request = new XMLHttpRequest();
-            	request.open("POST", "/getIn", true);            	
-            	// set `Content-Type` header
+            	request.open("POST", "/resume", true);  
+            	request.send();            	
+            	request.onload = function () {
+            		if (request.responseText == "NO_DATA") {
+            			alert("Auf dem Server liegen keine Daten vor");
+            		} else {
+            			location.href = "../private/Canvas.html";
+            		}            		        		
+            	};            	
+            }
+            
+            function restart() {
+            	let player = {
+                	name: document.getElementById('username').value,
+                	rocket: slideIndex
+                } 
+            	var request = new XMLHttpRequest();
+            	request.open("POST", "/restart", true);
             	request.setRequestHeader('Content-Type', 'application/json');
-            	// send rquest with JSON payload
-            	request.send(JSON.stringify(player)); 
-            	
+            	request.send(JSON.stringify(player));
             	request.onload = function () {
             		if (request.responseText == "ALREADY_USED") {
             			alert(`Username ${player.name} ist schon vergeben`);            			
@@ -439,16 +448,7 @@
             			alert("Geben Sie zuerst einen Namen ein");
             		} else {
             			location.href = "../private/Canvas.html";
-            		}            		
-            	};            	
-            }
-            
-            function restart() {
-            	var request = new XMLHttpRequest();
-            	request.open("POST", "/endSession", true);
-            	request.send();
-            	request.onload = function () {
-            		start();
+            		} 
             	};  
             }
             

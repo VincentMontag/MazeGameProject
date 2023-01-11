@@ -65,51 +65,47 @@ server.post("/getSolution", (req, res) => {
 	else res.send();
 });
 
-server.post("/getIn", (req, res) => {
-	if (usernameAlreadyUsed(req.body.name)) {
-		res.send("ALREADY_USED");
-		return;
-	}
-	if (req.body.name == "") {
-		res.send("EMPTY_NAME");
-		return;
-	}
+server.post("/resume", (req, res) => {
 	let session_id = req.cookies.session_id;
 	if (session_id === undefined || players1[session_id] === undefined) {
-		session_id = JSON.stringify(Math.random());
-		res.cookie("session_id", session_id);
-		maze.addPlayer(session_id, req.body.name);
-		let playerData = {
-			username: req.body.name,
-			rocket: getImagePath(req.body.rocket),
-			left: maze.getX(session_id),
-			top: maze.getY(session_id),
-			direction: 90,
-			status: 'playing'
-		}
-		players1[session_id] = playerData;		
+		res.send("NO_DATA");
 	} else {
 		players1[session_id].status = 'playing';
-	}	
-	console.log("Player got in: ("+
-		session_id+", "+
-		players1[session_id].username+", "+
-		players1[session_id].rocket+", "+
-		players1[session_id].left+", "+
-		players1[session_id].top+", "+
-		players1[session_id].direction+", "+
-		players1[session_id].status+")");
-	res.send();
+		sendPlayerDataToEveryone(serverSocket, session_id);
+		res.send();	
+	}
 });
 
 // Mark the player dead
-server.post("/endSession", (req, res) => {
+server.post("/restart", (req, res) => {
 	let session_id = req.cookies.session_id;
 	if (!(session_id === undefined || players1[session_id] === undefined)) {
 		players1[session_id].status = 'dead';
 		sendPlayerDataToEveryone(serverSocket, session_id);
 		delete players1[session_id];
 	}
+	if (req.body.name == "") {
+		res.send("EMPTY_NAME");
+		return;
+	}
+	if (usernameAlreadyUsed(req.body.name)) {
+		res.send("ALREADY_USED");
+		return;
+	}	
+	session_id = JSON.stringify(Math.random());
+	res.cookie("session_id", session_id);
+	maze.addPlayer(session_id, req.body.name);
+	let playerData = {
+		username: req.body.name,
+		rocket: getImagePath(req.body.rocket),
+		left: maze.getX(session_id),
+		top: maze.getY(session_id),
+		direction: 90,
+		status: 'playing'
+	}
+	players1[session_id] = playerData;
+	console.log("Player entered server: "+playerData.username);
+	sendPlayerDataToEveryone(serverSocket, session_id);
 	res.send();
 });
 
@@ -167,7 +163,7 @@ function sendDataFromEveryoneToPlayer(socket) {
 		socket.send(JSON.stringify(update))
 	}
 }
-
+ 
 // If a player moved or joined tha game everyone has to update this player data
 function sendPlayerDataToEveryone(serverSocket, actionid) {
 	let update = players1[actionid];

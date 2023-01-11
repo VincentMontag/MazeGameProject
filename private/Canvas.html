@@ -121,6 +121,7 @@
 			if (event.data.size == 0) return;
 			let update = JSON.parse(event.data);		
 			let playerTag = document.querySelector(`#${update.username}`);
+			console.log(update.username);
 			
 			// Create a new player div if there is no existing player div
 			if (playerTag == null) {
