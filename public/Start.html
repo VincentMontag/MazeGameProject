@@ -309,7 +309,7 @@
                 
                 <div id="spaceBetweenButtons"></div>
                 
-               	<button id="raceButton" class="submit" type="Button" onClick="">Rennen</button>
+               	<button id="raceButton" class="submit" type="Button" onClick="startRace()">Rennen</button>
                	<button id="playerNumber" class="submit" type="Button">Mitspieleranzahl:
                	<form id="selectDrop" name="dropForm">
       				<select name="dropSelect">
@@ -392,6 +392,17 @@
         			absolute Klarheit ist es möglich, per Klick auf einen Spieler dessen einzigartigen 
         			Namen zu erhalten.</h2>`;
         	}
+        	
+        	function startRace() {
+        		// TODO send http request to server for startin the race
+        	}
+        	
+        	function raceStartable() {
+        		//TODO ask server if the player can start a new game
+        		// if not: 'Mitspieleranzahl' ist nicht auswählbar
+        	}
+        	
+        	raceStartable();
             
             let slideIndex = 1;
             showSlides(slideIndex);
@@ -411,12 +422,6 @@
               }
             
               slides[slideIndex-1].style.display = "block";  
-            }
-
-            function openRules(txt){
-              window.open(txt,"_blank",
-              "width=500,height=400,"+
-              "resizable=yes,status=no,menubar=yes,location=no,scrollbars=yes,toolbar=no");
             }
             
             function resume() {            	          	
