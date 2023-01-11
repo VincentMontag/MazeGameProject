@@ -114,7 +114,15 @@ server.post("/markSleeping", (req, res) => {
 	res.send();
 });
 
+server.post("/startRace", (req, res) => {
+	let playerNumber = req.body.number;
+	console.log("start race with "+playerNumber+" players");
+	res.send();
+});
 
+server.get("/newRaceStartable", (req, res) => {
+	res.send("NO");
+});
 
 serverSocket.on('connection', function (socket) {
 	console.log("WebSocket connection built for moving");
