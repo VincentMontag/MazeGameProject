@@ -8,13 +8,14 @@ class Player {
 		Player.mi = mi;
 	}
 	
-	constructor(x, y, name) {
+	constructor(x, y, name, id) {
 		this.x = x;
 		this.y = y;
 		this.dir = Direction.RIGHT;
 		this.stepsNeeded = 0;
 		this.done = false;
 		this.name = name;
+		this.id = id;
 	}
 	
 	// Moves the player if it is allowed.
@@ -33,10 +34,11 @@ class Player {
 				}
 				this.done = true;
 				const m = require('./Maze.js');
-				m.setHighscore(JSON.stringify(key), {
+				this.highscore = {
 					steps: this.stepsNeeded, 
 					score: Math.floor(m.getShortestDistance() / this.stepsNeeded * 100)
-				});
+				};
+				m.setHighscore(JSON.stringify(key), this.highscore);
 			}
 			this.stepsNeeded++;
 			return true;

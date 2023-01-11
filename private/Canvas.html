@@ -52,7 +52,7 @@
 <body>
 	<div class="container">
 		<a href="../public/Start.html"><button class="button zurueck">Zurück</button></a>
-		<button id="wall_button" onclick="switchView()">Block Wände</button>
+		<button id="wall_button" onclick="switchView()">Strich Wände</button>
 		<div id="nameLabel"></div>
 	</div>		
 	<div id="game">
@@ -65,47 +65,62 @@
 	//==========================================================================================================
 	
 	let socket = null;
-	let maze = null;
-	let mazeSocket = null;
-	
+	let maze = null;	
 	//field width
-	let fieldWidth = 40;
+	let fieldWidth = 25;
 	// canvas to draw on
 	const mazegame = document.getElementById("MazeGame");
 	// context to draw on
 	const mazegame2d = mazegame.getContext("2d");
 	
-	function requireMaze() {
-		var request = new XMLHttpRequest();
-		request.open("GET", "/getMaze", true);
-		request.send();
-		request.onload = function () {
-			maze = JSON.parse(request.responseText);
-			mazegame.setAttribute("width", fieldWidth * (maze[0].length + 1));
-			mazegame.setAttribute("height", fieldWidth * maze.length);
-			switchView();
-		}
+	function movingEvent(update) {
+		let playerTag = document.querySelector(`#${update.username}`);
+		console.log(update.username);
+		
+		// Create a new player div if there is no existing player div
+		if (playerTag == null) {
+			playerTag = document.createElement("div");
+			playerTag.setAttribute("class", "rocket");
+			playerTag.setAttribute("id", `${update.username}`);
+			playerTag.setAttribute("onclick", `showName("${update.username}")`);
+			document.querySelector("#game").appendChild(playerTag);
+		}	
+		
+		// The received player left the game completely -> remove him
+		if (update.status == "dead") 
+			playerTag.remove();
+		
+		// The received player has moved -> update his data
+		else if (update.status == "playing")
+			playerTag.setAttribute("style", `left: ${update.left * fieldWidth}px; 
+										top: ${update.top * fieldWidth}px;
+										width: ${fieldWidth}px;
+										height: ${fieldWidth}px;
+										background-image: url(${update.rocket});
+										transform: rotate(${update.direction}deg);
+										opacity: 1;`);
+		
+		// The received player left the game, but his data is still available -> make him transparent
+		else 
+			playerTag.setAttribute("style", `left: ${update.left * fieldWidth}px; 
+											top: ${update.top * fieldWidth}px;
+											width: ${fieldWidth}px;
+											height: ${fieldWidth}px;
+											background-image: url(${update.rocket});
+											transform: rotate(${update.direction}deg);
+											opacity: 0.4;`);
 	}
 	
-	function openMazeWebSocket() {
-		mazeSocket = new WebSocket(`ws://${location.hostname}:${parseInt(location.port)+2}`);
-		
-		mazeSocket.onopen = () => {
-			requireMaze();
-			move("");
-		};
-		
-		mazeSocket.onmessage = (event) => {
-			let maze = JSON.parse(event.data);
-			let wallButton = document.getElementById("wall_button");
-			clearCanvas();
-			if (wallButton.innerHTML == "Block Wände") {
-				drawMaze(maze);
-			} else {
-				drawMazeBlockWalls(maze);
-			}
-			console.log("client finished at "+Date.now());
-		};
+	function mazeChange(update) {
+		maze = update;
+		mazegame.setAttribute("width", fieldWidth * (maze[0].length + 1));
+		mazegame.setAttribute("height", fieldWidth * maze.length);
+		drawMaze();
+	}
+	
+	function winEvent(update) {
+		console.log("Win with "+update.steps+" "+update.score);
+		//TODO
 	}
 	
 	function openWebSocket() {
@@ -114,50 +129,16 @@
 		socket = new WebSocket(`ws://${location.hostname}:${parseInt(location.port)+1}`);
 		
 		socket.onopen = () => {
-			openMazeWebSocket();			
+			move("");			
 		};
 		
 		socket.onmessage = (event) => {
 			if (event.data.size == 0) return;
-			let update = JSON.parse(event.data);		
-			let playerTag = document.querySelector(`#${update.username}`);
-			console.log(update.username);
-			
-			// Create a new player div if there is no existing player div
-			if (playerTag == null) {
-				playerTag = document.createElement("div");
-				playerTag.setAttribute("class", "rocket");
-				playerTag.setAttribute("id", `${update.username}`);
-				playerTag.setAttribute("onclick", `showName("${update.username}")`);
-				document.querySelector("#game").appendChild(playerTag);
-			}	
-			
-			// The received player left the game completely -> remove him
-			if (update.status == "dead") 
-				playerTag.remove();
-			
-			// The received player has moved -> update his data
-			else if (update.status == "playing")
-				playerTag.setAttribute("style", `left: ${update.left * fieldWidth}px; 
-											top: ${update.top * fieldWidth}px;
-											width: ${fieldWidth}px;
-											height: ${fieldWidth}px;
-											background-image: url(${update.rocket});
-											transform: rotate(${update.direction}deg);
-											opacity: 1;`);
-			
-			// The received player left the game, but his data is still available -> make him transparent
-			else 
-				playerTag.setAttribute("style", `left: ${update.left * fieldWidth}px; 
-												top: ${update.top * fieldWidth}px;
-												width: ${fieldWidth}px;
-												height: ${fieldWidth}px;
-												background-image: url(${update.rocket});
-												transform: rotate(${update.direction}deg);
-												opacity: 0.4;`);
-				
-			
-			
+			let message = JSON.parse(event.data);	
+			console.log(message.type);
+			if (message.type == "MOVE") movingEvent(message.content);
+			else if (message.type == "MAZE_CHANGE") mazeChange(message.content);
+			else if (message.type == "WIN") winEvent(message.content);		
 		};
 		
 		// If the player leaves Canvas.html, the socket will be closed
@@ -270,7 +251,7 @@
 		}
 	}
 	
-	function drawMaze(maze) {
+	function drawMazeLineWalls(maze) {
 		for (y = 0; y < maze.length; y++) {
 			for (x = 0; x < maze[0].length + 1; x++) {
 				if ((maze[y][x] & 0b1) == 1) // right vertical line
@@ -347,8 +328,18 @@
 			drawMazeBlockWalls(maze);
 			wallButton.innerHTML = "Strich Wände";
 		} else {
-			drawMaze(maze);
+			drawMazeLineWalls(maze);
 			wallButton.innerHTML = "Block Wände";
+		}
+	}
+	
+	function drawMaze() {
+		let wallButton = document.getElementById("wall_button");
+		clearCanvas();
+		if (wallButton.innerHTML == "Block Wände") {
+			drawMazeLineWalls(maze);
+		} else {
+			drawMazeBlockWalls(maze);
 		}
 	}
 	

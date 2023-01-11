@@ -20,7 +20,7 @@ let w = 0;
 let h = 0;
 
 function addPlayer(id, name) {
-	players[id] = new Player(0, 1, name);
+	players[id] = new Player(0, 1, name, id);
 }
 
 function movePlayer(id, direction) {
@@ -33,6 +33,14 @@ function getX(id) {
 
 function getY(id) {
 	return players[id].y;
+}
+
+function isDone(id) {
+	return players[id].done;
+}
+
+function getScoreOfPlayer(id) {
+	return players[id].highscore;
 }
 
 function generateMaze(width, height) {
@@ -49,7 +57,6 @@ function generateMaze(width, height) {
 		checkSolvable(new MazeInteraction(maze));
 	} while (shortestPath == -1);
 	Player.setMazeInteraction(new MazeInteraction(maze));
-	console.log("server finished at "+Date.now());
 	return maze;
 }
 
@@ -119,7 +126,7 @@ function getSolution() {
 	return solPath;
 }
 
-module.exports = { addPlayer, movePlayer, getX, getY, generateMaze, 
+module.exports = { addPlayer, movePlayer, isDone, getX, getY, generateMaze, getScoreOfPlayer,
 getHighscores, setHighscore, getShortestPath, getSolution, getShortestDistance };
 
 //===============================================================================

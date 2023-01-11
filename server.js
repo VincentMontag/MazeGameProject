@@ -5,8 +5,6 @@
 // Maze.js
 const maze = require("./Maze.js"); 
 
-let mazeFields = maze.generateMaze(40, 25, true);
-
 const solutionCode = "2943";
 
 var Direction = require('./Direction.js');
@@ -40,8 +38,7 @@ server.listen(portnumber, function ()  {
 // WebSocket for player move information
 const serverSocket = new WebSocket.Server({ port: (portnumber + 1) });
 
-// WebSocket for maze change information
-const serverSocketMaze = new WebSocket.Server({ port: (portnumber + 2) });
+sendMazeToClients();
 
 players1 = {}
 
@@ -49,10 +46,6 @@ players1 = {}
 server.get("/", (req, res) => {
     data = fs.readFileSync("public/Start.html", { encoding: 'utf8', flag: 'r' });
     res.send(data);
-});
-
-server.get("/getMaze", (req, res) => {
-	res.send(JSON.stringify(mazeFields));
 });
 
 server.get("/getHighscore", (req, res) => { 
@@ -121,55 +114,81 @@ server.post("/markSleeping", (req, res) => {
 	res.send();
 });
 
-function sendMazeToClients() {
-	mazeFields = maze.generateMaze(40, 25, false);
-	serverSocketMaze.clients.forEach(function each(client) {
-		client.send(JSON.stringify(mazeFields));
-	});
-	setTimeout(sendMazeToClients, 30000);
-}
 
-setTimeout(sendMazeToClients, 30000);
 
 serverSocket.on('connection', function (socket) {
 	console.log("WebSocket connection built for moving");
+	sendMazeToClient(socket);
 	
 	socket.onmessage = function incoming(event) {
-		let action = JSON.parse(event.data);
-		
+		let action = JSON.parse(event.data);		
 		// A player joined the game
 		if (action.dir == "") {
 			sendDataFromEveryoneToPlayer(socket);
-			sendPlayerDataToEveryone(serverSocket, action.id);			
-		
+			sendPlayerDataToEveryone(serverSocket, action.id);		
 		// A player moves
-		} else if (maze.movePlayer(action.id, Direction.get(action.dir))) {
-			
+		} else if (maze.movePlayer(action.id, Direction.get(action.dir))) {			
 			// Update player data on server
 			players1[action.id].left = maze.getX(action.id);
 			players1[action.id].top = maze.getY(action.id);
-			players1[action.id].direction = getAngle(action.dir);
-			
+			players1[action.id].direction = getAngle(action.dir);			
 			// Prepare update data and send it
 			sendPlayerDataToEveryone(serverSocket, action.id);
+			// Send win event
+			if (maze.isDone(action.id))
+				sendWinDataToPlayer(socket, maze.getScoreOfPlayer(action.id));
 		};		
     };
 });
 
 // If a new player joined the game he has to draw all the active players
 function sendDataFromEveryoneToPlayer(socket) {
-	for (ids in players1) {				
-		let update = players1[ids];
-		socket.send(JSON.stringify(update))
+	for (ids in players1) {		
+		let message = {
+			type: "MOVE",
+			content: players1[ids]
+		};
+		socket.send(JSON.stringify(message))
 	}
 }
  
 // If a player moved or joined tha game everyone has to update this player data
 function sendPlayerDataToEveryone(serverSocket, actionid) {
-	let update = players1[actionid];
+	let message = {
+		type: "MOVE",
+		content: players1[actionid]
+	};
 	serverSocket.clients.forEach(function each(client) {
-		client.send(JSON.stringify(update));
+		client.send(JSON.stringify(message));
 	});
+}
+
+function sendMazeToClients() {
+	mazeFields = maze.generateMaze(20, 10, false);
+	let message = {
+		type: "MAZE_CHANGE",
+		content: mazeFields
+	};
+	serverSocket.clients.forEach(function each(client) {
+		client.send(JSON.stringify(message));
+	});
+	setTimeout(sendMazeToClients, 20000);
+}
+
+function sendMazeToClient(client) {
+	let message = {
+		type: "MAZE_CHANGE",
+		content: mazeFields
+	};
+	client.send(JSON.stringify(message));
+}
+
+function sendWinDataToPlayer(client, score) {
+	let message = {
+		type: "WIN",
+		content: score
+	};
+	client.send(JSON.stringify(message));
 }
 
 function getImagePath(i) {
