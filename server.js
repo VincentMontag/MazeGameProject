@@ -108,7 +108,7 @@ server.post("/markSleeping", (req, res) => {
 	let session_id = req.cookies.session_id;
 	// In general the data should be available
 	if (!(session_id === undefined || players1[session_id] === undefined)) {
-		console.log(players1[session_id]+" is sleeping");
+		console.log(players1[session_id].username+" is sleeping");
 		players1[session_id].status = 'sleeping';
 		sendPlayerDataToEveryone(serverSocket, session_id);
 	}
