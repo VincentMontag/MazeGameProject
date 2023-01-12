@@ -53,7 +53,7 @@ server.get("/getHighscore", (req, res) => {
 });
 
 server.post("/getSolution", (req, res) => {
-	console.log("received code "+req.body.c);
+	console.log("solution requested -> code: "+req.body.c+" player_id: "+req.cookies.session_id);
 	if (req.body.c == solutionCode)	res.send(JSON.stringify(maze.getSolution()));
 	else res.send();
 });
@@ -63,6 +63,7 @@ server.post("/resume", (req, res) => {
 	if (session_id === undefined || players1[session_id] === undefined) {
 		res.send("NO_DATA");
 	} else {
+		console.log("player "+players1[session_id]+" goes on playing");
 		players1[session_id].status = 'playing';
 		sendPlayerDataToEveryone(serverSocket, session_id);
 		res.send();	
@@ -97,17 +98,17 @@ server.post("/restart", (req, res) => {
 		status: 'playing'
 	}
 	players1[session_id] = playerData;
-	console.log("Player entered server: "+playerData.username);
+	console.log("Player entered server: "+playerData.username+" ("+session_id+")");
 	sendPlayerDataToEveryone(serverSocket, session_id);
 	res.send();
 });
 
 // Mark the player sleeping
 server.post("/markSleeping", (req, res) => {
-	console.log("sleep");
 	let session_id = req.cookies.session_id;
 	// In general the data should be available
 	if (!(session_id === undefined || players1[session_id] === undefined)) {
+		console.log(players1[session_id]+" is sleeping");
 		players1[session_id].status = 'sleeping';
 		sendPlayerDataToEveryone(serverSocket, session_id);
 	}
@@ -172,7 +173,8 @@ function sendPlayerDataToEveryone(serverSocket, actionid) {
 }
 
 function sendMazeToClients() {
-	mazeFields = maze.generateMaze(20, 10, false);
+	console.log("send new maze to clients");
+	mazeFields = maze.generateMaze(40, 30, false);
 	let message = {
 		type: "MAZE_CHANGE",
 		content: mazeFields
