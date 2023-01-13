@@ -19,6 +19,8 @@ let maze = [];
 let w = 0;
 let h = 0;
 
+
+
 function addPlayer(id, name) {
 	players[id] = new Player(0, 1, name, id);
 }
@@ -41,6 +43,10 @@ function isDone(id) {
 
 function getScoreOfPlayer(id) {
 	return players[id].highscore;
+}
+
+function getPlayer(id) {
+	return players[id];
 }
 
 function generateMaze(width, height) {
@@ -127,7 +133,7 @@ function getSolution() {
 }
 
 module.exports = { addPlayer, movePlayer, isDone, getX, getY, generateMaze, getScoreOfPlayer,
-getHighscores, setHighscore, getShortestPath, getSolution, getShortestDistance };
+getHighscores, setHighscore, getShortestPath, getSolution, getShortestDistance, getPlayer };
 
 //===============================================================================
 // Methods for creating the maze

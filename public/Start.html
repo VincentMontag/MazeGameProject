@@ -410,7 +410,11 @@
         		request.setRequestHeader('Content-Type', 'application/json');
                 request.send(JSON.stringify(event));                    	
             	request.onload = function () {
-            		location.href = "../private/Canvas.html";            		        		
+            		if (request.responseText == "NO_DATA") {
+            			alert("Something with your id went wrong")
+            		} else {
+            			location.href = "../private/Canvas.html"; 
+            		}            		           		        		
             	};  
         	}
         	

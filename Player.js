@@ -16,12 +16,13 @@ class Player {
 		this.done = false;
 		this.name = name;
 		this.id = id;
+		this.wait = false;
 	}
 	
 	// Moves the player if it is allowed.
 	// dir is a matching string
 	move(direction) {
-		if (!this.done && Player.mi.isAllowed(this.x, this.y, direction)) {
+		if (!this.wait && !this.done && Player.mi.isAllowed(this.x, this.y, direction)) {
 			this.dir = direction;
 			if (direction.equal(Direction.UP)) this.y--;
 			else if (direction.equal(Direction.LEFT)) this.x--;

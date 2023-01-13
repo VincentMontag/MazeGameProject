@@ -1,46 +1,54 @@
-/**
- * The Maze-Race in Space
- */
- 
-// Maze.js
-const maze = require("./Maze.js"); 
-
+// ==================================================MACE VARIABLES===========================================
+const maze = require("./Maze.js");
+const WIDTH = 30;
+const HEIGHT = 20;
+const REFRESHING_TIME = 20000;
 const solutionCode = "2943";
-
 var Direction = require('./Direction.js');
+// ===========================================================================================================
+
+// ==================================================RACE VARIABLES===========================================
+var RACE_WAITING = false;
+var RACE_WAIT_ON = 0;
+var racers = {};
+// ===========================================================================================================
  
-// express server
+// ==================================================EXPRESS SERVER===========================================
 const express = require("express");
 const server = express();
 const cookieparser = require("cookie-parser");
 const fs = require("fs");
 const path = require("path");
 const WebSocket = require("ws");
+// ===========================================================================================================
 
+//==================================================SERVER CONFIG=============================================
 server.use(cookieparser());
 // The folder with all html files
 server.use(express.static("."));
 server.set("view engine", "ejs");
-
 // render the ejs views
 server.set("views", path.join("views"));
-
 // allow the express server to process POST request
 server.use(express.json());
 server.use(express.urlencoded({ extended: true }));
-
+// Portnumber
 portnumber = 8082;
+// WebSocket
+const serverSocket = new WebSocket.Server({ port: (portnumber + 1) });
+// ===========================================================================================================
 
+// =============================================PLAYER DATA===================================================
+players1 = {}
+// ===========================================================================================================
+
+// Server start
 server.listen(portnumber, function ()  {
     console.log('listening at port ' + portnumber);
 });
 
-// WebSocket for player move information
-const serverSocket = new WebSocket.Server({ port: (portnumber + 1) });
-
+// Generates the maze
 sendMazeToClients();
-
-players1 = {}
 
 // Start
 server.get("/", (req, res) => {
@@ -110,19 +118,49 @@ server.post("/markSleeping", (req, res) => {
 	if (!(session_id === undefined || players1[session_id] === undefined)) {
 		console.log(players1[session_id].username+" is sleeping");
 		players1[session_id].status = 'sleeping';
+		
+		// Remove his racing entry if the player was in a race
+		if (RACE_WAITING && racers[session_id] !== undefined) {
+			RACE_WAIT_ON++;
+			delete racers[session_id];
+		}
+		
 		sendPlayerDataToEveryone(serverSocket, session_id);
 	}
 	res.send();
 });
 
 server.post("/startRace", (req, res) => {
+	let session_id = req.cookies.session_id;
 	let playerNumber = req.body.number;
-	console.log("start race with "+playerNumber+" players");
+	
+	server.redirect("/restart");
+	
+	let player = maze.getPlayer(session_id);
+	racers[session_id] = player;
+	player.wait = true;
+	
+	if (RACE_WAITING) {
+		RACE_WAIT_ON--;		
+		if (RACE_WAIT_ON == 0) {
+			for (key in racers)
+				racers[key].wait = false;
+			RACE_WAITING = false;
+			// TODO: message all clients waiting on the start screen that there is a new race available
+		}		
+		
+	} else if (playerNumber >= 2 && playerNumber <= 10) {
+		RACE_WAITING = true;
+		RACE_WAIT_ON = playerNumber - 1;
+		console.log("start race with "+playerNumber+" players");
+	}	
+	
 	res.send();
 });
 
 server.get("/newRaceStartable", (req, res) => {
-	res.send("NO");
+	if (RACE_WAITING) res.send("NO");
+	else res.send("YES");
 });
 
 serverSocket.on('connection', function (socket) {
@@ -173,7 +211,7 @@ function sendPlayerDataToEveryone(serverSocket, actionid) {
 }
 
 function sendMazeToClients() {
-	mazeFields = maze.generateMaze(40, 30, false);
+	mazeFields = maze.generateMaze(WIDTH, HEIGHT, false);
 	let message = {
 		type: "MAZE_CHANGE",
 		content: mazeFields
@@ -181,7 +219,7 @@ function sendMazeToClients() {
 	serverSocket.clients.forEach(function each(client) {
 		client.send(JSON.stringify(message));
 	});
-	setTimeout(sendMazeToClients, 20000);
+	setTimeout(sendMazeToClients, REFRESHING_TIME);
 }
 
 function sendMazeToClient(client) {
