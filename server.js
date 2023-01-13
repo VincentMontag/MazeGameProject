@@ -80,6 +80,7 @@ server.post("/resume", (req, res) => {
 
 // Mark the player dead
 server.post("/restart", (req, res) => {
+	console.log("restart");
 	let session_id = req.cookies.session_id;
 	if (!(session_id === undefined || players1[session_id] === undefined)) {
 		players1[session_id].status = 'dead';
@@ -130,13 +131,17 @@ server.post("/markSleeping", (req, res) => {
 	res.send();
 });
 
+function checkRaceWaiting(socket, id) {
+	// Going to be executed when a player pressed the race button
+	// TODO: send them information about how many players have to join yet
+}
+
 server.post("/startRace", (req, res) => {
 	let session_id = req.cookies.session_id;
 	let playerNumber = req.body.number;
 	
-	server.redirect("/restart");
-	
 	let player = maze.getPlayer(session_id);
+	console.log(player === undefined);
 	racers[session_id] = player;
 	player.wait = true;
 	
@@ -171,6 +176,7 @@ serverSocket.on('connection', function (socket) {
 		let action = JSON.parse(event.data);		
 		// A player joined the game
 		if (action.dir == "") {
+			checkRaceWaiting(socket, action.id);
 			sendDataFromEveryoneToPlayer(socket);
 			sendPlayerDataToEveryone(serverSocket, action.id);		
 		// A player moves

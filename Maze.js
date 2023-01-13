@@ -46,6 +46,7 @@ function getScoreOfPlayer(id) {
 }
 
 function getPlayer(id) {
+	console.log(id+" "+players[id]);
 	return players[id];
 }
 

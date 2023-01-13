@@ -304,12 +304,12 @@
                     <br>
                 </div>
                         
-                <button id="playButton" class="end" type="Button" onClick="restart()">Neues Spiel</button>                
+                <button id="playButton" class="end" type="Button" onClick="restart(false)">Neues Spiel</button>                
                 <button id="continueButton" class="submit" type="Button" onClick="resume()">Spiel fortsetzen</button>
                 
                 <div id="spaceBetweenButtons"></div>
                 
-               	<button id="raceButton" class="submit" type="Button" onClick="startRace()">Rennen</button>
+               	<button id="raceButton" class="submit" type="Button" onClick="restart(true)">Rennen</button>
                	<button id="playerNumber" class="submit" type="Button">Mitspieleranzahl:
                	<form id="selectDrop" name="dropForm">
       				<select id="sDrop" name="dropSelect">
@@ -396,25 +396,22 @@
         	function startRace() {
         		let sDropElement = document.getElementById('sDrop');
         		var event;
-        		let player = {
-                    name: document.getElementById('username').value,
-                    rocket: slideIndex,
-                    number: '0'
-                } 
-        		if (sDropElement != null) {
-        			player.number = sDropElement.value;
+        		if (sDropElement == null) {
+        			event = {
+                        number: '0'
+                	}
+        		} else {
+        			event = {
+        				number: sDropElement.value
+        			}
         		}
         		var request = new XMLHttpRequest();
         		request.open("POST", "/startRace", true);
         		request.setRequestHeader('Content-Type', 'application/json');
                 request.send(JSON.stringify(event));                    	
             	request.onload = function () {
-            		if (request.responseText == "ALREADY_USED") {
-            			alert(`Der Name ${player.name} ist leider schon vergeben!`);            			
-            		} else if (request.responseText == "EMPTY_NAME") {
-            			alert("Geben Sie zuerst einen Namen ein!");
-            		} else if (request.responseText == "NO_DATA") {
-            			alert("Auf dem Server liegen keine Daten vor, die zu deiner ID passen.")
+            		if (request.responseText == "NO_DATA") {
+            			alert("Deine ID konnte nicht identifiziert werden.");
             		} else {
             			location.href = "../private/Canvas.html"; 
             		}            		           		        		
@@ -460,14 +457,14 @@
             	request.send();            	
             	request.onload = function () {
             		if (request.responseText == "NO_DATA") {
-            			alert("Auf dem Server liegen keine Daten vor.");
+            			alert("Auf dem Server liegen keine Daten vor");
             		} else {
             			location.href = "../private/Canvas.html";
             		}            		        		
             	};            	
             }
             
-            function restart() {
+            function restart(race) {
             	let player = {
                 	name: document.getElementById('username').value,
                 	rocket: slideIndex
@@ -478,12 +475,14 @@
             	request.send(JSON.stringify(player));
             	request.onload = function () {
             		if (request.responseText == "ALREADY_USED") {
-            			alert(`Der Name ${player.name} ist leider schon vergeben!`);            			
+            			alert(`Username ${player.name} ist schon vergeben`);            			
             		} else if (request.responseText == "EMPTY_NAME") {
-            			alert("Geben Sie zuerst einen Namen ein!");
+            			alert("Geben Sie zuerst einen Namen ein");
+            		} else if (race) {
+            			startRace();
             		} else {
             			location.href = "../private/Canvas.html";
-            		} 
+            		}
             	};  
             }
             
