@@ -173,7 +173,6 @@ function sendPlayerDataToEveryone(serverSocket, actionid) {
 }
 
 function sendMazeToClients() {
-	console.log("send new maze to clients");
 	mazeFields = maze.generateMaze(40, 30, false);
 	let message = {
 		type: "MAZE_CHANGE",
