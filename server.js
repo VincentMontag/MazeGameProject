@@ -244,7 +244,7 @@ function getImagePath(i) {
 	else if (i == 2) path = '../pixelart/player_brown.png';
 	else if (i == 3) path = '../pixelart/player_green.png';
 	else if (i == 4) path = '../pixelart/player_grey.png';
-	else if (i == 5) path = '../pixelart/player_patrol.png';
+	else if (i == 5) path = '../pixelart/player_petrol.png';
 	else if (i == 6) path = '../pixelart/player_pink.png';
 	else if (i == 7) path = '../pixelart/player_purple.png';
 	else if (i == 8) path = '../pixelart/player_red.png';
