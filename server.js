@@ -1,6 +1,6 @@
 // ==================================================MACE VARIABLES===========================================
 const maze = require("./Maze.js");
-const WIDTH = 30;
+const WIDTH = 35;
 const HEIGHT = 20;
 const REFRESHING_TIME = 20000;
 const solutionCode = "2943";
@@ -10,7 +10,10 @@ var Direction = require('./Direction.js');
 // ==================================================RACE VARIABLES===========================================
 var RACE_WAITING = false;
 var RACE_WAIT_ON = 0;
+var RACE_START_TIME = -1;
+var RACE_POSITION = 1;
 var racers = {};
+var racersScore = {};
 // ===========================================================================================================
  
 // ==================================================EXPRESS SERVER===========================================
@@ -58,6 +61,10 @@ server.get("/", (req, res) => {
 
 server.get("/getHighscore", (req, res) => { 
 	res.send(JSON.stringify(maze.getHighscores()));
+});
+
+server.get("/getRaceData", (erq, res) => {
+	res.send(JSON.stringify(racersScore));
 });
 
 server.post("/getSolution", (req, res) => {
@@ -153,6 +160,10 @@ server.post("/startRace", (req, res) => {
 		playerObject: player,
 		socket: null
 	}
+	racersScore[session_id] = {
+		time: -1,
+		place: 0
+	}
 	
 	// The player can't move while this is true
 	// If he sends a move he request, his data won't be updated
@@ -172,6 +183,7 @@ server.post("/startRace", (req, res) => {
 			for (key in racers)
 				racers[key].playerObject.wait = false;				
 			RACE_WAITING = false;
+			RACE_START_TIME = Date.now();
 		}
 			
 		
@@ -189,6 +201,13 @@ server.get("/newRaceStartable", (req, res) => {
 	if (RACE_WAITING) res.send("NO");
 	else res.send("YES");
 });
+
+function setGetRaceWinData(id) {
+	let t = Date.now() - RACE_START_TIME;
+	racersScore[id].time = (t - (t % 1000)) / 1000;
+	racersScore[id].place = RACE_POSITION++;
+	return {time: racersScore[id].time, place: racersScore[id].place};
+}
 
 serverSocket.on('connection', function (socket) {
 	console.log("WebSocket connection built");
@@ -226,8 +245,14 @@ serverSocket.on('connection', function (socket) {
 			sendPlayerDataToEveryone(serverSocket, action.id);
 			
 			// Send win event if the player has reached the target
-			if (maze.isDone(action.id))
-				sendWinDataToPlayer(socket, maze.getScoreOfPlayer(action.id));
+			if (maze.isDone(action.id)) {
+				let time = -1;
+				if (racers[action.id] !== undefined) 					
+					sendRaceWinDataToPlayer(socket, setGetRaceWinData(action.id));
+				else
+					sendWinDataToPlayer(socket, maze.getScoreOfPlayer(action.id), time);
+			}
+				
 				
 		};		
     };
@@ -287,6 +312,14 @@ function sendMazeToClient(client) {
 function sendWinDataToPlayer(client, score) {
 	let message = {
 		type: "WIN",
+		content: score
+	};
+	client.send(JSON.stringify(message));
+}
+
+function sendRaceWinDataToPlayer(client, score) {
+	let message = {
+		type: "RACE_WIN",
 		content: score
 	};
 	client.send(JSON.stringify(message));

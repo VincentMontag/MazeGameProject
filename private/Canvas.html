@@ -105,7 +105,7 @@
 	let socket = null;
 	let maze = null;	
 	//field width
-	let fieldWidth = 35;
+	let fieldWidth = 30;
 	// canvas to draw on
 	const mazegame = document.getElementById("MazeGame");
 	// context to draw on
@@ -170,6 +170,17 @@
 		toggleModal();
 	}
 	
+	function raceWinEvent(update) {
+		playerWon = true;
+		let content = document.getElementById("content");
+		content.innerHTML = "";
+		
+		content.innerHTML = "<h2>Benötigte Zeit: "+update.time+" Sekunden</h2>"+
+			"<h2>Platzierung: "+update.place+"</h2>";
+		
+		toggleModal();
+	}
+	
 	function waitOnMessage(update) {				
 		let content = document.getElementById("content");
 		content.innerHTML = "";
@@ -197,6 +208,7 @@
 			if (message.type == "MOVE") movingEvent(message.content);
 			else if (message.type == "MAZE_CHANGE") mazeChange(message.content);
 			else if (message.type == "WIN") winEvent(message.content);	
+			else if (message.type == "RACE_WIN") raceWinEvent(message.content);
 			else if (message.type == "WAIT_ON") waitOnMessage(message.content);
 		};
 		
