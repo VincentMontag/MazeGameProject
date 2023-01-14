@@ -9,12 +9,11 @@ var Queue = require('./Queue.js');
 // ===========================================================================================================
 
 // ==================================================RACE VARIABLES===========================================
-const RACE_SIZE = 2;
+const RACE_SIZE = 1;
 const MAX_RACE_TIME = 120000;
 var RACE_WAITING = false;
 var RACE_WAIT_ON = RACE_SIZE;
 var RACE_START_TIME = -1;
-var RACE_POSITION = 1;
 var racersDone = 0;
 var racers = {};
 var racersScore = [];
@@ -168,8 +167,9 @@ server.post("/startRace", (req, res) => {
 	player.wait = true;
 	
 	// There is a race currently. So let the player look and add him to the waitingRacers queue.
-	if (RACE_WAIT_ON == 0) {
-		waitingRacers.offer(session_id);
+	if (RACE_WAIT_ON <= 0) {
+		waitingRacers.offer(racers[session_id]);
+		RACE_WAIT_ON = -1;
 	} else {
 		RACE_WAIT_ON--;	
 		
@@ -184,7 +184,7 @@ server.post("/startRace", (req, res) => {
 			for (key in racers)
 				racers[key].playerObject.wait = false;
 			RACE_START_TIME = Date.now();
-			// TODO if the race is still running in MAX_RACE_TIME then break it
+			// TODO if the race is still running in MAX_RACE_TIME then break it. How???
 		}
 	}
 	
@@ -192,11 +192,22 @@ server.post("/startRace", (req, res) => {
 });
 
 function newRace() {
-	// Executed when all players reached tha target
 	racersDone = 0;
-	RACE_WAIT_ON = RACE_SIZE;
-	// clear racers???
-	// Take all waiting racers into the race
+	let waitOn = RACE_SIZE;
+	let ready = [];
+	while (waitOn != 0 && !waitingRacers.empty()) {
+		ready.push(waitingRacers.poll());
+		waitOn--;
+	}
+	RACE_WAIT_ON = waitOn;
+	for (racer of ready)
+		sendRaceWaitOn(racer.socket);	
+	if (waitOn == 0) {
+		racersScore.splice(0, racersScore.length);
+		for (racer of ready)
+			racer.playerObject.wait = false;
+	}
+	RACE_START_TIME = Date.now();
 	console.log("new race");
 }
 
@@ -246,6 +257,7 @@ serverSocket.on('connection', function (socket) {
 			// Send win event if the player has reached the target
 			if (maze.isDone(action.id)) {
 				if (racers[action.id] !== undefined) {
+					delete racers[action.id];
 					setRaceWinData(action.id);
 					sendRaceWinDataToPlayer(socket);					
 					racersDone++;
