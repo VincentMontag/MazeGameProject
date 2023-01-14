@@ -131,29 +131,51 @@ server.post("/markSleeping", (req, res) => {
 	res.send();
 });
 
-function checkRaceWaiting(socket, id) {
-	// Going to be executed when a player pressed the race button
-	// TODO: send them information about how many players have to join yet
-}
-
+// Actually, this post event is triggered after a getIn event automatically
 server.post("/startRace", (req, res) => {
 	let session_id = req.cookies.session_id;
+	
+	// If the client modified the code, he will get "NO_DATA" response
+	if (session_id === undefined || players1[session_id] === undefined) {
+		res.send("NO_DATA");
+		return;
+	}
+	
+	// The number of players he choose to play with
 	let playerNumber = req.body.number;
 	
+	// The player object the maze.js works with
 	let player = maze.getPlayer(session_id);
-	console.log(player === undefined);
-	racers[session_id] = player;
+	
+	// The JSON contains a placeholder for the socket for being able 
+	// to send information about the ract to the player
+	racers[session_id] = {
+		playerObject: player,
+		socket: null
+	}
+	
+	// The player can't move while this is true
+	// If he sends a move he request, his data won't be updated
 	player.wait = true;
 	
+	// Another player started a race and is waiting for other players now -> Join his race
 	if (RACE_WAITING) {
-		RACE_WAIT_ON--;		
-		if (RACE_WAIT_ON == 0) {
-			for (key in racers)
-				racers[key].wait = false;
-			RACE_WAITING = false;
-			// TODO: message all clients waiting on the start screen that there is a new race available
-		}		
+		RACE_WAIT_ON--;	
 		
+		// Send RACE_WAIT_ON to all waiting racers
+		// The new racer gets the information automatically when the WebSocket connection is built
+		for (key in racers)
+			sendRaceWaitOn(racers[key].socket);				
+		
+		// The race is starting now	-> wait = false
+		if (RACE_WAIT_ON == 0) {	
+			for (key in racers)
+				racers[key].playerObject.wait = false;				
+			RACE_WAITING = false;
+		}
+			
+		
+	// Currently, there is no race-waiting -> start a new race
 	} else if (playerNumber >= 2 && playerNumber <= 10) {
 		RACE_WAITING = true;
 		RACE_WAIT_ON = playerNumber - 1;
@@ -169,30 +191,56 @@ server.get("/newRaceStartable", (req, res) => {
 });
 
 serverSocket.on('connection', function (socket) {
-	console.log("WebSocket connection built for moving");
+	console.log("WebSocket connection built");
 	sendMazeToClient(socket);
 	
 	socket.onmessage = function incoming(event) {
-		let action = JSON.parse(event.data);		
-		// A player joined the game
+		let action = JSON.parse(event.data);	
+			
+		// Initial movement (A player joined the game)
 		if (action.dir == "") {
-			checkRaceWaiting(socket, action.id);
+			
+			// Add his socket to the racing list if he has joined the race
+			// Send information about how many players still have to join
+			if (racers[action.id] !== undefined) {
+				racers[action.id].socket = socket;
+				sendRaceWaitOn(socket);
+			}
+			
+			// Send the data of all active players to the new one
+			// Possible, this command can already be executed after "sendMazeToClient"
 			sendDataFromEveryoneToPlayer(socket);
-			sendPlayerDataToEveryone(serverSocket, action.id);		
-		// A player moves
-		} else if (maze.movePlayer(action.id, Direction.get(action.dir))) {			
-			// Update player data on server
+			
+			// Send the data of the new one to all active players
+			sendPlayerDataToEveryone(serverSocket, action.id);	
+				
+		// A player wants to move -> if the player is allowed to move the code block is going to be executed
+		} else if (maze.movePlayer(action.id, Direction.get(action.dir))) {	
+					
+			// Update the player data
 			players1[action.id].left = maze.getX(action.id);
 			players1[action.id].top = maze.getY(action.id);
-			players1[action.id].direction = getAngle(action.dir);			
-			// Prepare update data and send it
+			players1[action.id].direction = getAngle(action.dir);
+					
+			// The updated player data is going to be sent to all players including the one who moved
 			sendPlayerDataToEveryone(serverSocket, action.id);
-			// Send win event
+			
+			// Send win event if the player has reached the target
 			if (maze.isDone(action.id))
 				sendWinDataToPlayer(socket, maze.getScoreOfPlayer(action.id));
+				
 		};		
     };
 });
+
+function sendRaceWaitOn(client) {
+	if (client == null) return;
+	let message = {
+		type: "WAIT_ON",
+		content: ""+RACE_WAIT_ON
+	};
+	client.send(JSON.stringify(message));
+}
 
 // If a new player joined the game he has to draw all the active players
 function sendDataFromEveryoneToPlayer(socket) {

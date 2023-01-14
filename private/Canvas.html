@@ -46,6 +46,39 @@
 			font-weight: bold;
 			float: right;			
 		}
+		
+		.modal {
+		    position: fixed;
+		    left: 0;
+		    top: 0;
+		    width: 100%;
+		    height: 100%;
+		    background-color: rgba(0, 0, 0, 0.5);
+		    opacity: 0;
+		    visibility: hidden;
+		    transform: scale(1.1);
+		    transition: visibility 0s linear 0.25s, opacity 0.25s 0s, transform 0.25s;
+		}
+	
+		.modal-content {
+		    position: absolute;
+		    top: 50%;
+		    left: 50%;
+		    transform: translate(-50%, -50%);
+		    background-color: black;
+		    color:white;
+		    padding: 1rem 1.5rem;
+		    width: 60rem;
+		    border-radius: 0.5rem;
+		}
+		
+		.show-modal {
+		    opacity: 1;
+		    visibility: visible;
+		    transform: scale(1);
+		    transition: visibility 0s linear 0s, opacity 0.25s 0s, transform 0.25s;
+		}
+		
     </style>
     	
 </head>
@@ -57,6 +90,11 @@
 	</div>		
 	<div id="game">
     	<canvas id = "MazeGame" width = "1500" height = "750"></canvas>
+	</div>
+	<div class="modal">
+    	<div class="modal-content">
+        	<div id="content"></div>        				
+    	</div>
 	</div>
 	
 	<script>
@@ -118,9 +156,29 @@
 		drawMaze();
 	}
 	
-	function winEvent(update) {
-		console.log("Win with "+update.steps+" "+update.score);
-		//TODO
+	// Used for the close event of the modal
+	var playerWon = false;
+	
+	function winEvent(update) {		
+		playerWon = true;
+		let content = document.getElementById("content");
+		content.innerHTML = "";
+		
+		content.innerHTML = "<h2>Glückwunsch! Du hast "+update.steps+
+			" Schritte gebraucht und hast "+update.score+" Punkte erreicht!</h2>";
+		
+		toggleModal();
+	}
+	
+	function waitOnMessage(update) {				
+		let content = document.getElementById("content");
+		content.innerHTML = "";
+		
+		if (update == "0") content.innerHTML = "<h1>Los!</h1>";
+		else content.innerHTML = "<h2>Warte auf "+update+" Spieler !</h2>";
+		
+		toggleModal();
+		setTimeout(() => toggleModal(), 2000);		
 	}
 	
 	function openWebSocket() {
@@ -138,7 +196,8 @@
 			console.log(message.type);
 			if (message.type == "MOVE") movingEvent(message.content);
 			else if (message.type == "MAZE_CHANGE") mazeChange(message.content);
-			else if (message.type == "WIN") winEvent(message.content);		
+			else if (message.type == "WIN") winEvent(message.content);	
+			else if (message.type == "WAIT_ON") waitOnMessage(message.content);
 		};
 		
 		// If the player leaves Canvas.html, the socket will be closed
@@ -365,6 +424,18 @@
 		});
 		return cookie[name];
 	}
+	
+	const modal = document.querySelector(".modal");
+	
+	function toggleModal() {
+	    modal.classList.toggle("show-modal");
+	}
+	
+	window.addEventListener("click", (event) => {
+		if (playerWon && event.target === modal) {
+	        toggleModal();
+	    }
+	});
 	
 	//==========================================================================================================
 	//==========================================================================================================
