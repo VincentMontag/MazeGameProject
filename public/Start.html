@@ -201,7 +201,7 @@
 		}
 	    
 		/* HighscoreButton and DescriptionButton Design */
-		#highscoreButton, #descriptionButton{
+		#highscoreButton, #descriptionButton, #raceHighscoreButton {
 			padding: 13px;
   			font-size: 13px;
   			cursor: pointer;
@@ -310,6 +310,7 @@
                 <div id="spaceBetweenButtons"></div>
                 
                	<button id="raceButton" class="submit" type="Button" onClick="restart(true)">Rennen</button>
+               	<!--
                	<button id="playerNumber" class="submit" type="Button">Mitspieleranzahl:
                	<form id="selectDrop" name="dropForm">
       				<select id="sDrop" name="dropSelect">
@@ -325,6 +326,8 @@
       				</select>
    				</form>
    				</button>
+   				-->
+   				<button id="raceHighscoreButton" class="trigger" type="Button" onClick="raceHighscore()">Platzierung</button>
                	
                	<div id="spaceBetweenButtons"></div>
                 
@@ -342,6 +345,39 @@
         </div>       
       
         <script>
+        
+	        function raceHighscore() {
+	    		// Create table
+	    		let table = document.createElement("table");
+	    		table.setAttribute("id", "scores");
+	    		table.innerHTML +=
+	    			`<tr>
+	    				<th>Platzierung</th>
+	    				<th>Spielername</th>
+	    				<th>Zeit in Sekunden</th>
+	  				</tr>`;
+	  			document.getElementById("content").innerHTML = "";
+	  			document.getElementById("content").appendChild(table);
+	  				
+	  			// Get score data
+	        	var request = new XMLHttpRequest();
+				request.open("GET", "/getRaceData", true);
+				request.send();
+				request.onload = function () {
+					console.log("load");
+					let data = JSON.parse(request.responseText);
+					for (p = 0; p < data.length; p++) {
+						console.log(p);
+						table.innerHTML += 
+							`<tr>
+								<td>${p + 1}</td>
+								<td>${data[p].name}</td>
+								<td>${data[p].time}</td>
+							</tr>`;
+							
+					}
+				}
+	    	}
         
         	function highscore() {
         		// Create table
@@ -417,19 +453,6 @@
             		}            		           		        		
             	};  
         	}
-        	
-        	function raceStartable() {
-        		var request = new XMLHttpRequest();
-            	request.open("GET", "/newRaceStartable", true);  
-            	request.send();
-            	request.onload = function () {
-            		if (request.responseText == "NO") {
-            			document.getElementById('playerNumber').innerHTML = "Spieler warten auf dich!";
-            		}           		        		
-            	};
-        	}
-        	
-        	raceStartable();
             
             let slideIndex = 1;
             showSlides(slideIndex);

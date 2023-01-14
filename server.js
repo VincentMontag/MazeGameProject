@@ -5,15 +5,20 @@ const HEIGHT = 20;
 const REFRESHING_TIME = 20000;
 const solutionCode = "2943";
 var Direction = require('./Direction.js');
+var Queue = require('./Queue.js');
 // ===========================================================================================================
 
 // ==================================================RACE VARIABLES===========================================
+const RACE_SIZE = 2;
+const MAX_RACE_TIME = 120000;
 var RACE_WAITING = false;
-var RACE_WAIT_ON = 0;
+var RACE_WAIT_ON = RACE_SIZE;
 var RACE_START_TIME = -1;
 var RACE_POSITION = 1;
+var racersDone = 0;
 var racers = {};
-var racersScore = {};
+var racersScore = [];
+var waitingRacers = new Queue();
 // ===========================================================================================================
  
 // ==================================================EXPRESS SERVER===========================================
@@ -63,7 +68,7 @@ server.get("/getHighscore", (req, res) => {
 	res.send(JSON.stringify(maze.getHighscores()));
 });
 
-server.get("/getRaceData", (erq, res) => {
+server.get("/getRaceData", (req, res) => {
 	res.send(JSON.stringify(racersScore));
 });
 
@@ -148,9 +153,6 @@ server.post("/startRace", (req, res) => {
 		return;
 	}
 	
-	// The number of players he choose to play with
-	let playerNumber = req.body.number;
-	
 	// The player object the maze.js works with
 	let player = maze.getPlayer(session_id);
 	
@@ -160,17 +162,15 @@ server.post("/startRace", (req, res) => {
 		playerObject: player,
 		socket: null
 	}
-	racersScore[session_id] = {
-		time: -1,
-		place: 0
-	}
 	
 	// The player can't move while this is true
 	// If he sends a move he request, his data won't be updated
 	player.wait = true;
 	
-	// Another player started a race and is waiting for other players now -> Join his race
-	if (RACE_WAITING) {
+	// There is a race currently. So let the player look and add him to the waitingRacers queue.
+	if (RACE_WAIT_ON == 0) {
+		waitingRacers.offer(session_id);
+	} else {
 		RACE_WAIT_ON--;	
 		
 		// Send RACE_WAIT_ON to all waiting racers
@@ -179,34 +179,33 @@ server.post("/startRace", (req, res) => {
 			sendRaceWaitOn(racers[key].socket);				
 		
 		// The race is starting now	-> wait = false
-		if (RACE_WAIT_ON == 0) {	
+		if (RACE_WAIT_ON == 0) {
+			racersScore.splice(0, racersScore.length);	
 			for (key in racers)
-				racers[key].playerObject.wait = false;				
-			RACE_WAITING = false;
+				racers[key].playerObject.wait = false;
 			RACE_START_TIME = Date.now();
+			// TODO if the race is still running in MAX_RACE_TIME then break it
 		}
-			
-		
-	// Currently, there is no race-waiting -> start a new race
-	} else if (playerNumber >= 2 && playerNumber <= 10) {
-		RACE_WAITING = true;
-		RACE_WAIT_ON = playerNumber - 1;
-		console.log("start race with "+playerNumber+" players");
-	}	
+	}
 	
 	res.send();
 });
 
-server.get("/newRaceStartable", (req, res) => {
-	if (RACE_WAITING) res.send("NO");
-	else res.send("YES");
-});
+function newRace() {
+	// Executed when all players reached tha target
+	racersDone = 0;
+	RACE_WAIT_ON = RACE_SIZE;
+	// clear racers???
+	// Take all waiting racers into the race
+	console.log("new race");
+}
 
-function setGetRaceWinData(id) {
+function setRaceWinData(id) {
 	let t = Date.now() - RACE_START_TIME;
-	racersScore[id].time = (t - (t % 1000)) / 1000;
-	racersScore[id].place = RACE_POSITION++;
-	return {time: racersScore[id].time, place: racersScore[id].place};
+	racersScore.push({
+		name: players1[id].username,
+		time: (t - (t % 1000)) / 1000
+	});
 }
 
 serverSocket.on('connection', function (socket) {
@@ -246,26 +245,20 @@ serverSocket.on('connection', function (socket) {
 			
 			// Send win event if the player has reached the target
 			if (maze.isDone(action.id)) {
-				let time = -1;
-				if (racers[action.id] !== undefined) 					
-					sendRaceWinDataToPlayer(socket, setGetRaceWinData(action.id));
-				else
-					sendWinDataToPlayer(socket, maze.getScoreOfPlayer(action.id), time);
-			}
-				
+				if (racers[action.id] !== undefined) {
+					setRaceWinData(action.id);
+					sendRaceWinDataToPlayer(socket);					
+					racersDone++;
+					if (racersDone == RACE_SIZE) newRace();					
+				} else
+					sendWinDataToPlayer(socket, maze.getScoreOfPlayer(action.id));
+			}				
 				
 		};		
     };
 });
 
-function sendRaceWaitOn(client) {
-	if (client == null) return;
-	let message = {
-		type: "WAIT_ON",
-		content: ""+RACE_WAIT_ON
-	};
-	client.send(JSON.stringify(message));
-}
+//================================================MOVE EVENT===================================================
 
 // If a new player joined the game he has to draw all the active players
 function sendDataFromEveryoneToPlayer(socket) {
@@ -289,6 +282,10 @@ function sendPlayerDataToEveryone(serverSocket, actionid) {
 	});
 }
 
+//===========================================================================================================
+
+//==============================================MAZE CHANGE==================================================
+
 function sendMazeToClients() {
 	mazeFields = maze.generateMaze(WIDTH, HEIGHT, false);
 	let message = {
@@ -309,6 +306,10 @@ function sendMazeToClient(client) {
 	client.send(JSON.stringify(message));
 }
 
+//===========================================================================================================
+
+//==================================================WIN EVENT================================================
+
 function sendWinDataToPlayer(client, score) {
 	let message = {
 		type: "WIN",
@@ -317,13 +318,28 @@ function sendWinDataToPlayer(client, score) {
 	client.send(JSON.stringify(message));
 }
 
-function sendRaceWinDataToPlayer(client, score) {
+//===========================================================================================================
+
+//==================================================RACE EVENT===============================================
+
+function sendRaceWinDataToPlayer(client) {
 	let message = {
 		type: "RACE_WIN",
-		content: score
+		content: {t: racersScore[racersScore.length-1].time, p: racersScore.length}
 	};
 	client.send(JSON.stringify(message));
 }
+
+function sendRaceWaitOn(client) {
+	if (client == null) return;
+	let message = {
+		type: "WAIT_ON",
+		content: ""+RACE_WAIT_ON
+	};
+	client.send(JSON.stringify(message));
+}
+
+//===========================================================================================================
 
 function getImagePath(i) {
 	let path = "";
