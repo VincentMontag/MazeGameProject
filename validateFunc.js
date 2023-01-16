@@ -1,7 +1,7 @@
-let valid = 0;
-let vEingabe;
 
-export function validate(eingabe){
+function validate(eingabe){
+	let valid = 0;
+	let vEingabe;
 	if(eingabe.includes("<") ||
 	   eingabe.includes(">") ||
 	   eingabe.includes("%") ||
@@ -42,3 +42,5 @@ export function validate(eingabe){
 		return vEingabe
 	}
 }
+
+module.exports = {validate};
