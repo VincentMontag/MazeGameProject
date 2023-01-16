@@ -313,23 +313,6 @@
                 <div id="spaceBetweenButtons"></div>
                 
                	<button id="raceButton" class="submit" type="Button" onClick="restart(true)">Rennen</button>
-               	<!--
-               	<button id="playerNumber" class="submit" type="Button">Mitspieleranzahl:
-               	<form id="selectDrop" name="dropForm">
-      				<select id="sDrop" name="dropSelect">
-         				<option value="2">2</option>
-         				<option value="3">3</option>
-         				<option value="4">4</option>
-         				<option value="5">5</option>
-         				<option value="6">6</option>
-         				<option value="7">7</option>
-         				<option value="8">8</option>
-         				<option value="9">9</option>
-         				<option value="10">10</option>
-      				</select>
-   				</form>
-   				</button>
-   				-->
    				<button id="raceHighscoreButton" class="trigger" type="Button" onClick="raceHighscore()">Platzierung</button>
                	
                	<div id="spaceBetweenButtons"></div>
@@ -501,7 +484,9 @@
             	request.send(JSON.stringify(player));
             	request.onload = function () {
             		if (request.responseText == "ALREADY_USED") {
-            			alert(`Username ${player.name} ist schon vergeben`);            			
+            			alert(`Username ${player.name} ist schon vergeben`); 
+            		} else if (request.responseText == "INVALID") {
+            			alert("Das ist ein ungültiger Name.");
             		} else if (request.responseText == "EMPTY_NAME") {
             			alert("Geben Sie zuerst einen Namen ein");
             		} else if (race) {
