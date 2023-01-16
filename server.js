@@ -1,5 +1,6 @@
 // ==================================================MACE VARIABLES===========================================
 const maze = require("./Maze.js");
+const PASSWORD = "175943175411";
 const WIDTH = 35;
 const HEIGHT = 20;
 const REFRESHING_TIME = 20000;
@@ -8,8 +9,8 @@ var Queue = require('./Queue.js');
 // ===========================================================================================================
 
 // ==================================================RACE VARIABLES===========================================
-const RACE_SIZE = 5;
-const MAX_RACE_TIME = 120000;
+var RACE_SIZE = 2;
+var MAX_RACE_TIME = 120000;
 var RACE_WAIT_ON = RACE_SIZE;
 var RACE_START_TIME = -1;
 var racersDone = 0;
@@ -71,6 +72,24 @@ server.get("/getRaceData", (req, res) => {
 
 server.get("/getSolution", (req, res) => {
 	res.send(JSON.stringify(maze.getSolution()));
+});
+
+server.post("/set", (req, res) => {
+	var num;
+	try {
+		num = Number(req.body.valu);
+	} catch(err) {
+		res.send();
+		return;
+	} 
+	if (req.body.password != PASSWORD) {
+	} else if (req.body.vari == "race_size") {
+		RACE_SIZE = num;
+		RACE_WAIT_ON = RACE_SIZE;
+	} else if (req.body.vari == "refreshing_time") {
+		REFRESHING_TIME = num * 1000;
+	}
+	res.send();
 });
 
 server.post("/resume", (req, res) => {
