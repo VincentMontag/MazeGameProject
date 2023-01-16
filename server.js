@@ -6,6 +6,7 @@ const REFRESHING_TIME = 20000;
 const solutionCode = "2943";
 var Direction = require('./Direction.js');
 var Queue = require('./Queue.js');
+const validateFunc = require('./validateFunc.js');
 // ===========================================================================================================
 
 // ==================================================RACE VARIABLES===========================================
@@ -71,11 +72,12 @@ server.get("/getRaceData", (req, res) => {
 	res.send(JSON.stringify(racersScore));
 });
 
+/*
 server.post("/getSolution", (req, res) => {
 	console.log("solution requested -> code: "+req.body.c+" player_id: "+req.cookies.session_id);
 	if (req.body.c == solutionCode)	res.send(JSON.stringify(maze.getSolution()));
 	else res.send();
-});
+});*/
 
 server.post("/resume", (req, res) => {
 	let session_id = req.cookies.session_id;
@@ -91,7 +93,7 @@ server.post("/resume", (req, res) => {
 
 // Mark the player dead
 server.post("/restart", (req, res) => {
-	console.log("restart");
+	console.log("restart");	
 	let session_id = req.cookies.session_id;
 	if (!(session_id === undefined || players1[session_id] === undefined)) {
 		players1[session_id].status = 'dead';
@@ -100,6 +102,10 @@ server.post("/restart", (req, res) => {
 	}
 	if (req.body.name == "") {
 		res.send("EMPTY_NAME");
+		return;
+	}
+	if (validateFunc.validate(req.body.name) == -1) {
+		res.send("INVALID");
 		return;
 	}
 	if (usernameAlreadyUsed(req.body.name)) {
