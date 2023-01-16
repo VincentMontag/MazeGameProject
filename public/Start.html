@@ -481,11 +481,9 @@
             	request.send(JSON.stringify(player));
             	request.onload = function () {
             		if (request.responseText == "ALREADY_USED") {
-            			alert(`Username ${player.name} ist schon vergeben`); 
+            			alert(`Username ${player.name} ist leider schon vergeben!`); 
             		} else if (request.responseText == "INVALID") {
-            			alert("Das ist ein ungültiger Name.");
-            		} else if (request.responseText == "EMPTY_NAME") {
-            			alert("Geben Sie zuerst einen Namen ein");
+            			alert("Dein Name darf nur Groß- und Kleinbuchstaben enthalten.");
             		} else if (race) {
             			startRace();
             		} else {

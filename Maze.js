@@ -83,6 +83,7 @@ var keyIrrgartenkoenig = null;
 
 function shortestPathLength(directions) {
 	let pos = {x: w+1, y: h};
+	solPath = [];
 	while (pos.x != 0) {
 		shortestPath++;
 		solPath.push(pos);

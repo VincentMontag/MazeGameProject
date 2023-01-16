@@ -3,16 +3,13 @@ const maze = require("./Maze.js");
 const WIDTH = 35;
 const HEIGHT = 20;
 const REFRESHING_TIME = 20000;
-const solutionCode = "2943";
 var Direction = require('./Direction.js');
 var Queue = require('./Queue.js');
-const validateFunc = require('./validateFunc.js');
 // ===========================================================================================================
 
 // ==================================================RACE VARIABLES===========================================
 const RACE_SIZE = 5;
 const MAX_RACE_TIME = 120000;
-var RACE_WAITING = false;
 var RACE_WAIT_ON = RACE_SIZE;
 var RACE_START_TIME = -1;
 var racersDone = 0;
@@ -72,12 +69,9 @@ server.get("/getRaceData", (req, res) => {
 	res.send(JSON.stringify(racersScore));
 });
 
-/*
 server.post("/getSolution", (req, res) => {
-	console.log("solution requested -> code: "+req.body.c+" player_id: "+req.cookies.session_id);
-	if (req.body.c == solutionCode)	res.send(JSON.stringify(maze.getSolution()));
-	else res.send();
-});*/
+	res.send(JSON.stringify(maze.getSolution()));
+});
 
 server.post("/resume", (req, res) => {
 	let session_id = req.cookies.session_id;
@@ -91,20 +85,20 @@ server.post("/resume", (req, res) => {
 	}
 });
 
+function validName(input) {
+	return /^[A-Za-z]{1,10}$/.test(input);
+}
+
 // Mark the player dead
 server.post("/restart", (req, res) => {
 	console.log("restart");	
 	let session_id = req.cookies.session_id;
-	if (!(session_id === undefined || players1[session_id] === undefined)) {
+	if (session_id !== undefined && players1[session_id] !== undefined) {
 		players1[session_id].status = 'dead';
 		sendPlayerDataToEveryone(serverSocket, session_id);
 		delete players1[session_id];
 	}
-	if (req.body.name == "") {
-		res.send("EMPTY_NAME");
-		return;
-	}
-	if (validateFunc.validate(req.body.name) == -1) {
+	if (!validName(req.body.name)) {
 		res.send("INVALID");
 		return;
 	}
@@ -133,13 +127,16 @@ server.post("/restart", (req, res) => {
 server.post("/markSleeping", (req, res) => {
 	let session_id = req.cookies.session_id;
 	// In general the data should be available
-	if (!(session_id === undefined || players1[session_id] === undefined)) {
+	if (session_id !== undefined && players1[session_id] !== undefined) {
 		console.log(players1[session_id].username+" is sleeping");
 		players1[session_id].status = 'sleeping';
 		
 		// Remove his racing entry if the player was in a race
-		if (RACE_WAITING && racers[session_id] !== undefined) {
+		if (racers[session_id] !== undefined) {
+			
+			//TODO
 			RACE_WAIT_ON++;
+			
 			delete racers[session_id];
 		}
 		
@@ -190,7 +187,9 @@ server.post("/startRace", (req, res) => {
 			for (key in racers)
 				racers[key].playerObject.wait = false;
 			RACE_START_TIME = Date.now();
-			// TODO if the race is still running in MAX_RACE_TIME then break it. How???
+			// TODO if the race is still running in MAX_RACE_TIME then break it
+			// id = setTimout...
+			// clearTimeout(id);...
 		}
 	}
 	
@@ -230,15 +229,17 @@ serverSocket.on('connection', function (socket) {
 	sendMazeToClient(socket);
 	
 	socket.onmessage = function incoming(event) {
-		var action;
+		var action;	
 		
+		// Check if it is a valid message	
 		try {
 			action = JSON.parse(event.data);
 		} catch(err) {
 			return;
 		}
-		
-		if (action != "RIGHT" && action != "LEFT" && action != "DOWN" && action != "UP" && action != "") return;
+		if (action.id === undefined || players1[action.id] === undefined || action.dir === undefined ||
+		(action.dir != "" && action.dir != "RIGHT" && action.dir != "LEFT" && 
+		action.dir != "DOWN" && action.dir != "UP" )) return;
 			
 		// Initial movement (A player joined the game)
 		if (action.dir == "") {
