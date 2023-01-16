@@ -138,7 +138,10 @@
 		    visibility: hidden;
 		    transform: scale(1.1);
 		    transition: visibility 0s linear 0.25s, opacity 0.25s 0s, transform 0.25s;
+			overflow: auto;
 		}
+
+	
 	
 		.modal-content {
 		    position: absolute;
@@ -391,8 +394,10 @@
         				<th>Erreichte Punkte</th>
       				</tr>`;
       			document.getElementById("content").innerHTML = "";
-      			document.getElementById("content").appendChild(table);
-      				
+      			document.getElementById("content").appendChild(table);			  
+    						
+    			}
+      			
       			// Get score data
             	var request = new XMLHttpRequest();
     			request.open("GET", "/getHighscore", true);
@@ -404,7 +409,7 @@
     					let time = (new Date(JSON.parse(key).time)).toLocaleTimeString();
     					let steps = data[key].steps;
     					let score = data[key].score;
-    					
+
     					table.innerHTML += 
     						`<tr>
     							<td>${name}</td>
@@ -412,8 +417,6 @@
     							<td>${steps}</td>
     							<td>${score}</td>
     						</tr>`;
-    						
-    				}
     			}
         	}
         	
