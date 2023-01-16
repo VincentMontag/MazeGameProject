@@ -69,7 +69,7 @@ server.get("/getRaceData", (req, res) => {
 	res.send(JSON.stringify(racersScore));
 });
 
-server.post("/getSolution", (req, res) => {
+server.get("/getSolution", (req, res) => {
 	res.send(JSON.stringify(maze.getSolution()));
 });
 

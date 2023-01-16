@@ -310,7 +310,7 @@
 	
 	function drawSolution() {
 		var request = new XMLHttpRequest();
-		request.open("POST", "/getSolution", true);
+		request.open("GET", "/getSolution", true);
     	request.send();
 		request.onload = function () {
 			let solution = JSON.parse(request.responseText);
