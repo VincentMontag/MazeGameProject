@@ -30,6 +30,7 @@ export function validate(eingabe){
 	   eingabe.includes("*") ||
 	   eingabe.includes("~") ||
 	   eingabe.includes("=") ||
+	   eingabe.includes(" ") ||
 	   eingabe.includes("^"))
 	{
 	
