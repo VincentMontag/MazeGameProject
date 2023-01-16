@@ -308,14 +308,11 @@
 		mazegame2d.restore();        // restore the transform
 	}
 	
-	function drawSolution(code) {
+	function drawSolution() {
 		var request = new XMLHttpRequest();
-		request.open("POST", "/getSolution", true);
-		request.setRequestHeader('Content-Type', 'application/json');
-		let json = {c: code};
-    	request.send(JSON.stringify(json));
+		request.open("GET", "/getSolution", true);
+    	request.send();
 		request.onload = function () {
-			if (request.responseText == "") return;
 			let solution = JSON.parse(request.responseText);
 			for (i = 0; i < solution.length - 1; i++)
 				drawLine(solution[i].x, solution[i].y, solution[i+1].x, solution[i+1].y, 0.5);
