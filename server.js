@@ -231,6 +231,8 @@ serverSocket.on('connection', function (socket) {
 		} catch(err) {
 			return;
 		}
+		
+		if (action != "RIGHT" && action != "LEFT" && action != "DOWN" && action != "UP" && action != "") return;
 			
 		// Initial movement (A player joined the game)
 		if (action.dir == "") {
