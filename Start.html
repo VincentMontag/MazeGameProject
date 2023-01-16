@@ -350,10 +350,8 @@
 				request.open("GET", "/getRaceData", true);
 				request.send();
 				request.onload = function () {
-					console.log("load");
 					let data = JSON.parse(request.responseText);
 					for (p = 0; p < data.length; p++) {
-						console.log(p);
 						table.innerHTML += 
 							`<tr>
 								<td>${p + 1}</td>

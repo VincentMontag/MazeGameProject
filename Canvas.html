@@ -113,7 +113,6 @@
 	
 	function movingEvent(update) {
 		let playerTag = document.querySelector(`#${update.username}`);
-		console.log(update.username);
 		
 		// Create a new player div if there is no existing player div
 		if (playerTag == null) {
@@ -204,8 +203,7 @@
 		
 		socket.onmessage = (event) => {
 			if (event.data.size == 0) return;
-			let message = JSON.parse(event.data);	
-			console.log(message.type);
+			let message = JSON.parse(event.data);
 			if (message.type == "MOVE") movingEvent(message.content);
 			else if (message.type == "MAZE_CHANGE") mazeChange(message.content);
 			else if (message.type == "WIN") winEvent(message.content);	
