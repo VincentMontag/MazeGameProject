@@ -19,8 +19,6 @@ let maze = [];
 let w = 0;
 let h = 0;
 
-
-
 function addPlayer(id, name) {
 	players[id] = new Player(0, 1, name, id);
 }
@@ -46,7 +44,6 @@ function getScoreOfPlayer(id) {
 }
 
 function getPlayer(id) {
-	console.log(id+" "+players[id]);
 	return players[id];
 }
 
