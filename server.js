@@ -224,7 +224,13 @@ serverSocket.on('connection', function (socket) {
 	sendMazeToClient(socket);
 	
 	socket.onmessage = function incoming(event) {
-		let action = JSON.parse(event.data);	
+		var action;
+		
+		try {
+			action = JSON.parse(event.data);
+		} catch(err) {
+			return;
+		}
 			
 		// Initial movement (A player joined the game)
 		if (action.dir == "") {
