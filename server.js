@@ -9,7 +9,7 @@ var Queue = require('./Queue.js');
 // ===========================================================================================================
 
 // ==================================================RACE VARIABLES===========================================
-const RACE_SIZE = 4;
+const RACE_SIZE = 5;
 const MAX_RACE_TIME = 120000;
 var RACE_WAITING = false;
 var RACE_WAIT_ON = RACE_SIZE;
