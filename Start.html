@@ -378,8 +378,6 @@
       				</tr>`;
       			document.getElementById("content").innerHTML = "";
       			document.getElementById("content").appendChild(table);			  
-    						
-    			}
       			
       			// Get score data
             	var request = new XMLHttpRequest();
@@ -400,6 +398,7 @@
     							<td>${steps}</td>
     							<td>${score}</td>
     						</tr>`;
+    				}
     			}
         	}
         	
@@ -435,7 +434,7 @@
             		if (request.responseText == "NO_DATA") {
             			alert("Deine ID konnte nicht identifiziert werden.");
             		} else {
-            			location.href = "../private/Canvas.html"; 
+            			location.href = "Canvas.html"; 
             		}            		           		        		
             	};  
         	}
@@ -468,7 +467,7 @@
             		if (request.responseText == "NO_DATA") {
             			alert("Auf dem Server liegen keine Daten vor");
             		} else {
-            			location.href = "../private/Canvas.html";
+            			location.href = "Canvas.html";
             		}            		        		
             	};            	
             }
@@ -492,7 +491,7 @@
             		} else if (race) {
             			startRace();
             		} else {
-            			location.href = "../private/Canvas.html";
+            			location.href = "Canvas.html";
             		}
             	};  
             }

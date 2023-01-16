@@ -57,7 +57,7 @@ sendMazeToClients();
 
 // Start
 server.get("/", (req, res) => {
-    data = fs.readFileSync("public/Start.html", { encoding: 'utf8', flag: 'r' });
+    data = fs.readFileSync("Start.html", { encoding: 'utf8', flag: 'r' });
     res.send(data);
 });
 
