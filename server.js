@@ -1,8 +1,8 @@
 // ==================================================MACE VARIABLES===========================================
 const maze = require("./Maze.js");
-const WIDTH = 35;
-const HEIGHT = 20;
-const REFRESHING_TIME = 20000;
+var WIDTH = 35;
+var HEIGHT = 20;
+var REFRESHING_TIME = 20000;
 var Direction = require('./Direction.js');
 var Queue = require('./Queue.js');
 // ===========================================================================================================
