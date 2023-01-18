@@ -39,7 +39,7 @@ console.log("raceSize -> Sets the race size. It is highly recommended to only us
 console.log("refreshingTime -> with this setting, you can decide, after what time the labyrinth automatically refreshes. The time you choose will be in ms! Recommended refreshTime: 20000 ms");
 console.log("width -> lets you choose a custom width for the maze. Recommended width is: 35");
 console.log("height -> lets you choose a custom height for the maze. Recommended height is: 20");
-console.log("Be aware! The height as well as the width will ONLY apply at the next time you start a game. It won't be an immediate change.");
+console.log("Be aware! The height as well as the width will ONLY apply at the next time the maze is generated. It won't be an immediate change.");
 //============================================================================================================
 
 //==================================================SERVER CONFIG=============================================
