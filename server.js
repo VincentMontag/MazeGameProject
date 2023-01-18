@@ -37,9 +37,6 @@ console.log();
 console.log("blockRace -> can be either true or false. If it is true, the race is blocked and all currently active players are removed from the game.");
 console.log("raceSize -> Sets the race size. It is highly recommended to only use this setting if the race is already blocked. After you have blocked the race with the blockRace setting metioned above, you can pick a size you want.")
 console.log("refreshingTime -> with this setting, you can decide, after what time the labyrinth automatically refreshes. The time you choose will be in ms! Recommended refreshTime: 20000 ms");
-console.log("width -> lets you choose a custom width for the maze. Recommended width is: 35");
-console.log("height -> lets you choose a custom height for the maze. Recommended height is: 20");
-console.log("Be aware! The height as well as the width will ONLY apply at the next time the maze is generated. It won't be an immediate change.");
 //============================================================================================================
 
 //==================================================SERVER CONFIG=============================================
@@ -70,22 +67,20 @@ players1 = {}
 var prompt = require('prompt');
 prompt.start();
 
-function setSetting({setting, value}) {
-	if (setting == 'blockRace') {
+function setSetting(setting) {
+	if (setting.s == 'blockRace') {
 		console.log("blockRace");
-	} else if (setting == 'raceSize') {
-		console.log("Set race size but stop race before and start it afterwards");
-	} else if (setting == 'refreshingTime') {
-		console.log("Update refreshing time");
-	} else if (setting == 'width') {
-		console.log("Update width");
-	} else if (setting == 'height') {
-		console.log("Update height");
+	} else if (setting.s == 'raceSize') {
+		RACE_SIZE = Number(setting.v);
+	} else if (setting.s == "maxRaceTime") {
+		MAX_RACE_TIME = Number(setting.v);	
+	} else if (setting.s == 'refreshingTime') {
+		REFRESHING_TIME = Number(setting.v);
 	}
 	promptGetter().then(setSetting);
 }
 
-async function promptGetter() {
+function promptGetter() {
 	return prompt.get(['s', 'v']);
 }
 
