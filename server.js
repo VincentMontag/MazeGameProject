@@ -2,7 +2,7 @@
 const maze = require("./Maze.js");
 var WIDTH = 35;
 var HEIGHT = 20;
-var REFRESHING_TIME = 20000;
+var REFRESHING_TIME = 10000;
 var Direction = require('./Direction.js');
 var Queue = require('./Queue.js');
 // ===========================================================================================================
