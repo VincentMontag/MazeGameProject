@@ -10,10 +10,13 @@ var Direction = require('./Direction.js');
 var RACE_SIZE = 2;
 var REQUESTED_RACE_SIZE = 2;
 var MAX_RACE_TIME = 120000;
+var MAX_START_TIME = 20000;
 var TIMER_ID = 0;
+var WAITING_TIMER_ID = 0;
 var RACE_WAIT_ON = RACE_SIZE;
 var RACE_START_TIME = -1;
 var FIRST_RACER_REACHED_TARGET = false;	
+var FIRST_PLAYER_ENTERED_RACE = false;
 var RACE_RUNNING = false;
 var WAIT_ON_CONNECTION = 0;
 var racersDone = 0;
@@ -212,6 +215,11 @@ server.post("/startRace", (req, res) => {
 		waitingRacers[session_id] = racers[session_id]
 	} else {
 		RACE_WAIT_ON--;	
+		
+		if (!FIRST_PLAYER_ENTERED_RACE) {
+			FIRST_PLAYER_ENTERED_RACE = true;
+			WAITING_TIMER_ID = setTimeout(newRace, MAX_START_TIME, 1);
+		} 
 			
 		// The race is starting now
 		if (RACE_WAIT_ON == 0)
@@ -237,7 +245,7 @@ function racerLeftGame(session_id) {
 	} else {
 		racersDone++;			
 		delete racers[session_id];
-		if (racersDone == RACE_SIZE) newRace(false);
+		if (racersDone == RACE_SIZE) newRace(0);
 	}
 }
 
@@ -262,10 +270,14 @@ function racerDone(id, socket) {
 	sendRaceWinDataToPlayer(socket);
 						
 	racersDone++;
-	if (racersDone == RACE_SIZE) newRace(false);	
+	if (racersDone == RACE_SIZE) newRace(0);	
 }
 
 function newRace(timeOut) {
+	// Send message that race is over
+	console.log("new race started with timeOut value "+timeOut);
+	for (key in racers)
+		sendRaceIsOver(racers[key].socket);
 	// Clear all
 	racers = {}
 	racersDone = 0;
@@ -273,7 +285,7 @@ function newRace(timeOut) {
 	RACE_WAIT_ON = RACE_SIZE;	
 	RACE_RUNNING = false;
 	FIRST_RACER_REACHED_TARGET = false;
-	if (!timeOut) clearTimeout(TIMER_ID);
+	if (timeOut == 2) clearTimeout(TIMER_ID);
 	
 	// Add waiting racers to the racers
 	for (key in waitingRacers) {
@@ -295,7 +307,7 @@ function newRace(timeOut) {
 		for (key in racers)
 			racers[key].playerObject.wait = false;
 		RACE_START_TIME = Date.now();	
-		TIMER_ID = setTimeout(newRace, MAX_RACE_TIME, true);
+		TIMER_ID = setTimeout(newRace, MAX_RACE_TIME, 2);
 		RACE_RUNNING = true;
 	}
 }
@@ -312,8 +324,11 @@ function handleRaceOnConnection(id, socket) {
 				sendRaceWaitOn(racers[key].socket);	
 			}
 			RACE_START_TIME = Date.now();
-			TIMER_ID = setTimeout(newRace, MAX_RACE_TIME, true);
+			TIMER_ID = setTimeout(newRace, MAX_RACE_TIME, 2);
 			RACE_RUNNING = true;
+			clearTimeout(WAITING_TIMER_ID);
+		} else {
+			sendRaceWaitOn(socket);
 		}
 	// The player must wait until the race is over
 	} else {
@@ -445,6 +460,7 @@ function sendWinDataToPlayer(client, score) {
 //==================================================RACE EVENT===============================================
 
 function sendRaceWinDataToPlayer(client) {
+	if (client == null) return;
 	let message = {
 		type: "RACE_WIN",
 		content: {t: racersScore[racersScore.length-1].time, p: racersScore.length}
@@ -453,8 +469,6 @@ function sendRaceWinDataToPlayer(client) {
 }
 
 function sendRaceWaitOn(client) {
-	console.log("waiton");
-	if (client == null) console.log("but socket is null!");
 	if (client == null) return;
 	let message = {
 		type: "WAIT_ON",
@@ -464,8 +478,18 @@ function sendRaceWaitOn(client) {
 }
 
 function sendRaceStillRunning(client) {
+	if (client == null) return;
 	let message = {
 		type: "RACE_STILL_RUNNING",
+		content: {}
+	};
+	client.send(JSON.stringify(message));
+}
+
+function sendRaceIsOver(client) {
+	if (client == null) return;
+	let message = {
+		type: "RACE_OVER",
 		content: {}
 	};
 	client.send(JSON.stringify(message));

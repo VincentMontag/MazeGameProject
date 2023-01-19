@@ -198,6 +198,13 @@
 		setTimeout(() => toggleModal(), 2000);
 	}
 	
+	function raceOver() {
+		let content = document.getElementById("content");
+		content.innerHTML = "<h3>Das Rennen ist vorbei! Kehre zurück zum Startbildschirm.</h3>";
+		toggleModal();
+		setTimeout(() => toggleModal(), 2000);
+	}
+	
 	function openWebSocket() {
 		
 		// Create connection to server
@@ -216,6 +223,7 @@
 			else if (message.type == "RACE_WIN") raceWinEvent(message.content);
 			else if (message.type == "WAIT_ON") waitOnMessage(message.content);
 			else if (message.type == "RACE_STILL_RUNNING") raceStillRunning();
+			else if (message.type == "RACE_OVER") raceOver();
 		};
 		
 		// If the player leaves Canvas.html, the socket will be closed
