@@ -46,6 +46,7 @@ console.log("newRace -> stops the current race and starts a new one");
 console.log("maxRaceTime -> the time before a race terminates although not every player has reached the target");
 console.log("raceSize -> sets the requested race size. It is applied when a new race is starting")
 console.log("refreshTime -> the time in milliseconds the maze refreshes itself automatically");
+console.log("bonusSteps -> the number of times a player can drive through walls after tha maze has been generated again");
 console.log();
 //============================================================================================================
 
@@ -81,11 +82,13 @@ function setSetting(setting) {
 	if (setting.s == 'raceSize') {
 		REQUESTED_RACE_SIZE = Number(setting.v);
 	} else if (setting.s == "newRace") {
-		newRace(false);
+		newRace(0);
 	} else if (setting.s == "maxRaceTime") {
 		MAX_RACE_TIME = Number(setting.v);	
-	} else if (setting.s == 'refreshTime') {
+	} else if (setting.s == "refreshTime") {
 		REFRESHING_TIME = Number(setting.v);
+	} else if (setting.s == "bonusSteps") {
+		maze.setBonusSteps(Number(setting.v));
 	}
 	promptGetter().then(setSetting);
 }

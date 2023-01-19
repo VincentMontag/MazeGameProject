@@ -13,6 +13,8 @@ highscores = {};
 	
 shortestPath = -1;
 
+var bonusSteps = 2;
+
 let solPath = [];
 
 let maze = [];
@@ -61,13 +63,17 @@ function generateMaze(width, height) {
 		checkSolvable(new MazeInteraction(maze));
 	} while (shortestPath == -1);
 	Player.setMazeInteraction(new MazeInteraction(maze));
-	setBonusStep();
+	setBonusStepsOnPlayers();
 	return maze;
 }
 
-function setBonusStep() {
+function setBonusStepsOnPlayers() {
 	for (key in players)
-		players[key].bonus = 2;
+		players[key].bonus = bonusSteps;
+}
+
+function setBonusSteps(value) {
+	bonusSteps = value;
 }
 
 function getHighscores() {
@@ -138,7 +144,7 @@ function getSolution() {
 }
 
 module.exports = { addPlayer, movePlayer, isDone, getX, getY, generateMaze, getScoreOfPlayer,
-getHighscores, setHighscore, getShortestPath, getSolution, getShortestDistance, getPlayer };
+getHighscores, setHighscore, getShortestPath, getSolution, getShortestDistance, getPlayer, setBonusSteps };
 
 //===============================================================================
 // Methods for creating the maze
