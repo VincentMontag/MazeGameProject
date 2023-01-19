@@ -31,8 +31,12 @@ class MazeInteraction {
 	hinted = true if the check should be proceeded on the hinted maze
 	*/	
 	hasWall(x, y, d) {
-		if (x < 0 || y < 0 || x > this.maze[0].length + 1 ||y > this.maze.length + 1) return true;
 		return ((this.maze[y][x] >> d.num) & 0b1) == 1; 
+	}
+	
+	outOfMaze(x, y) {
+		return !(x == 0 && y == 1) && !(x == this.maze[0].length && y == this.maze.length - 2) && 
+			(x < 1 || y < 1 || x > this.maze[0].length - 1 || y > this.maze.length - 2);
 	}
 	
 }

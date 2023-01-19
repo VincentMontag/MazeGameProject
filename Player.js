@@ -17,17 +17,26 @@ class Player {
 		this.name = name;
 		this.id = id;
 		this.wait = false;
+		this.bonus = false;
 	}
 	
 	// Moves the player if it is allowed.
 	// dir is a matching string
 	move(direction) {
-		if (!this.wait && !this.done && Player.mi.isAllowed(this.x, this.y, direction)) {
+		if (!this.wait && !this.done && 
+				(Player.mi.isAllowed(this.x, this.y, direction) || this.bonus)) {
 			this.dir = direction;
+			this.bonus = false;
+			this.oldX = this.x;
+			this.oldY = this.y;
 			if (direction.equal(Direction.UP)) this.y--;
 			else if (direction.equal(Direction.LEFT)) this.x--;
 			else if (direction.equal(Direction.RIGHT)) this.x++;
 			else if (direction.equal(Direction.DOWN)) this.y++;
+			if (Player.mi.outOfMaze(this.x, this.y)) {
+				this.x = this.oldX;
+				this.y = this.oldY;
+			}
 			if (this.x == Player.mi.maze[0].length) {
 				let key = {
 					username: this.name,

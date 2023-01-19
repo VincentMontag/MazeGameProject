@@ -61,7 +61,13 @@ function generateMaze(width, height) {
 		checkSolvable(new MazeInteraction(maze));
 	} while (shortestPath == -1);
 	Player.setMazeInteraction(new MazeInteraction(maze));
+	setBonusStep();
 	return maze;
+}
+
+function setBonusStep() {
+	for (key in players)
+		players[key].bonus = true;
 }
 
 function getHighscores() {
