@@ -67,7 +67,7 @@ function generateMaze(width, height) {
 
 function setBonusStep() {
 	for (key in players)
-		players[key].bonus = true;
+		players[key].bonus = 2;
 }
 
 function getHighscores() {
