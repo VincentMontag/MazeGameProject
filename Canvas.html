@@ -184,12 +184,18 @@
 		let content = document.getElementById("content");
 		content.innerHTML = "";
 		
-		if (update == "-1") content.innerHTML = "<h2>Warte bis zum nächsten Rennen!</h2>"
-		else if (update == "0") content.innerHTML = "<h1>Los!</h1>";
+		if (update == "0") content.innerHTML = "<h1>Los!</h1>";
 		else content.innerHTML = "<h2>Warte auf "+update+" Spieler !</h2>";
 		
 		toggleModal();
 		setTimeout(() => toggleModal(), 2000);		
+	}
+	
+	function raceStillRunning() {
+		let content = document.getElementById("content");
+		content.innerHTML = "<h2>Warte bis zum nächsten Rennen!</h2>";
+		toggleModal();
+		setTimeout(() => toggleModal(), 2000);
 	}
 	
 	function openWebSocket() {
@@ -209,6 +215,7 @@
 			else if (message.type == "WIN") winEvent(message.content);	
 			else if (message.type == "RACE_WIN") raceWinEvent(message.content);
 			else if (message.type == "WAIT_ON") waitOnMessage(message.content);
+			else if (message.type == "RACE_STILL_RUNNING") raceStillRunning();
 		};
 		
 		// If the player leaves Canvas.html, the socket will be closed
