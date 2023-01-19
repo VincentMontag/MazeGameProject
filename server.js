@@ -1,7 +1,7 @@
 // ==================================================MACE VARIABLES===========================================
 const maze = require("./Maze.js");
-var WIDTH = 35;
-var HEIGHT = 20;
+var WIDTH = 38;
+var HEIGHT = 22;
 var REFRESHING_TIME = 10000;
 var Direction = require('./Direction.js');
 // ===========================================================================================================
