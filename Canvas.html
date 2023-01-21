@@ -111,6 +111,7 @@
 	// context to draw on
 	const mazegame2d = mazegame.getContext("2d");
 	// dic with non racers -> mark them black
+	let racingMode = false;
 	racers = {};
 	
 	function movingEvent(update) {
@@ -127,7 +128,8 @@
 		
 		// activate black image if necessary
 		var image;
-		if (racers[update.username] == true)
+		console.log(racers[update.username]);
+		if (racers[update.username] !== undefined || !racingMode)
 			image = update.rocket;
 		else
 			image = '../pixelart/player_black.png';
@@ -193,7 +195,10 @@
 		let content = document.getElementById("content");
 		content.innerHTML = "";
 		
-		if (update == "0") content.innerHTML = "<h1>Los!</h1>";
+		if (update == "0") {
+			content.innerHTML = "<h1>Los!</h1>";
+			racingMode = true;
+		}
 		else content.innerHTML = "<h2>Warte auf "+update+" Spieler !</h2>";
 		
 		toggleModal();
@@ -215,7 +220,8 @@
 	}
 	
 	function markBlack(list) {
-		racers = JSON.parse(list);
+		racers = list;
+		for (key in racers) console.log(key);
 		/* TODO mark all players black ... for ... in document.getElementById(game).children...
 		for (...) {
 			let player = document.getElementById(key);

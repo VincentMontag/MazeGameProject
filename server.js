@@ -345,8 +345,10 @@ function handleRaceOnConnection(id, socket) {
 // Generates a dictionary with all racers
 function getRacerListForClient() {
 	var racerList = {};
-	for (key in racers)
-		racerList[key] == true;
+	for (key in racers) {
+		racerList[players1[key].username] = true;
+		console.log(racerList[key]);
+	}
 	return racerList;
 }
 
@@ -511,6 +513,7 @@ function sendRaceIsOver(client) {
 
 function sendRacerList(client, racerList) {
 	if (client == null) return;
+	console.log("sendRacerList"+racerList);
 	let message = {
 		type: "MARK_BLACK",
 		content: racerList
