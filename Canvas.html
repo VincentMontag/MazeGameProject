@@ -111,7 +111,7 @@
 	// context to draw on
 	const mazegame2d = mazegame.getContext("2d");
 	// dic with non racers -> mark them black
-	blackDrivers = {};
+	racers = {};
 	
 	function movingEvent(update) {
 		let playerTag = document.querySelector(`#${update.username}`);
@@ -127,10 +127,10 @@
 		
 		// activate black image if necessary
 		var image;
-		if (blackDrivers[update.username] == true)
-			image = '../pixelart/player_black.png';
-		else
+		if (racers[update.username] == true)
 			image = update.rocket;
+		else
+			image = '../pixelart/player_black.png';
 		
 		// The received player left the game completely -> remove him
 		if (update.status == "dead") 
@@ -215,15 +215,16 @@
 	}
 	
 	function markBlack(list) {
-		blackDrivers = JSON.parse(list);
-		for (key : blackDrivers) {
+		racers = JSON.parse(list);
+		/* TODO mark all players black ... for ... in document.getElementById(game).children...
+		for (...) {
 			let player = document.getElementById(key);
 			let style = player.getAttribute('style');
-			style = style.substring.(style.indexOf('background')) + 
+			style = style.substring(style.indexOf('background')) + 
 			'background-image: url(../pixelart/player_black.png);' +
 			style.substring(style.indexOf('transform'));
 			player.setAttribute('style', style);
-		}
+		}*/
 	}
 	
 	function openWebSocket() {
