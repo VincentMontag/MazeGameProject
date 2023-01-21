@@ -110,6 +110,8 @@
 	const mazegame = document.getElementById("MazeGame");
 	// context to draw on
 	const mazegame2d = mazegame.getContext("2d");
+	// dic with non racers -> mark them black
+	blackDrivers = {};
 	
 	function movingEvent(update) {
 		let playerTag = document.querySelector(`#${update.username}`);
@@ -121,7 +123,14 @@
 			playerTag.setAttribute("id", `${update.username}`);
 			playerTag.setAttribute("onclick", `showName("${update.username}")`);
 			document.querySelector("#game").appendChild(playerTag);
-		}	
+		}
+		
+		// activate black image if necessary
+		var image;
+		if (blackDrivers[update.username] == true)
+			image = '../pixelart/player_black.png';
+		else
+			image = update.rocket;
 		
 		// The received player left the game completely -> remove him
 		if (update.status == "dead") 
@@ -133,7 +142,7 @@
 										top: ${update.top * fieldWidth}px;
 										width: ${fieldWidth}px;
 										height: ${fieldWidth}px;
-										background-image: url(${update.rocket});
+										background-image: url(${image});
 										transform: rotate(${update.direction}deg);
 										opacity: 1;`);
 		
@@ -143,7 +152,7 @@
 											top: ${update.top * fieldWidth}px;
 											width: ${fieldWidth}px;
 											height: ${fieldWidth}px;
-											background-image: url(${update.rocket});
+											background-image: url(${image});
 											transform: rotate(${update.direction}deg);
 											opacity: 0.4;`);
 	}
@@ -205,6 +214,18 @@
 		setTimeout(() => toggleModal(), 2000);
 	}
 	
+	function markBlack(list) {
+		blackDrivers = JSON.parse(list);
+		for (key : blackDrivers) {
+			let player = document.getElementById(key);
+			let style = player.getAttribute('style');
+			style = style.substring.(style.indexOf('background')) + 
+			'background-image: url(../pixelart/player_black.png);' +
+			style.substring(style.indexOf('transform'));
+			player.setAttribute('style', style);
+		}
+	}
+	
 	function openWebSocket() {
 		
 		// Create connection to server
@@ -224,6 +245,7 @@
 			else if (message.type == "WAIT_ON") waitOnMessage(message.content);
 			else if (message.type == "RACE_STILL_RUNNING") raceStillRunning();
 			else if (message.type == "RACE_OVER") raceOver();
+			else if (message.type == "MARK_BLACK") markBlack(message.content);
 		};
 		
 		// If the player leaves Canvas.html, the socket will be closed

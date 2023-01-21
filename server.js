@@ -321,10 +321,13 @@ function handleRaceOnConnection(id, socket) {
 	if (!RACE_RUNNING) {
 		// WAIT_ON_CONNECTION has been set to the racer which triggers the starting event
 		if (id == WAIT_ON_CONNECTION) {
+			// get black list
+			let blackList = getBlackList();
 			// Set them startable
 			for (key in racers) {
 				racers[key].playerObject.wait = false;
 				sendRaceWaitOn(racers[key].socket);	
+				markBlack(racers[key].socket, blackList);
 			}
 			RACE_START_TIME = Date.now();
 			TIMER_ID = setTimeout(newRace, MAX_RACE_TIME, 2);
@@ -337,6 +340,15 @@ function handleRaceOnConnection(id, socket) {
 	} else {
 		sendRaceStillRunning(socket);
 	}
+}
+
+// Generates a dictionary with all non racers
+function getBlackList() {
+	var blackList = {};
+	for (key in players1)
+		if (racers[key] === undefined)
+			blackList[players1[key].username] = true;
+	return blackList;
 }
 
 //============================================================================================================
@@ -494,6 +506,15 @@ function sendRaceIsOver(client) {
 	let message = {
 		type: "RACE_OVER",
 		content: {}
+	};
+	client.send(JSON.stringify(message));
+}
+
+function markBlack(client, blackList) {
+	if (client == null) return;
+	let message = {
+		type: "MARK_BLACK",
+		content: blackList
 	};
 	client.send(JSON.stringify(message));
 }
